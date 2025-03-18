@@ -1,12 +1,18 @@
-# React + Vite
+UPDATES:
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+- main is updated tuesday 18th, 2025. 00:44 ( remember to pull)
+- production is updated tuesday 18th, 2025. 00:44 ( remember to pull)
+- feature-routing has been updated tuesday 18th, 2025. 01:28 ( remember to pull)
+LAST CHANGES:
+ - Production branch fixed file structure issues with nested folders. we had a duplicate with critix x2. this is fixed.
+ - adde branches for workflow. Main - Production - feature bramches like homepage, detail page, routing etc.
+.
 
-Currently, two official plugins are available:
+NOTES!!
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Remember to pull before pushing!
+Please only push part, component or function to feature. give a cue or notice on when the feature branch is ready and create a
+pull request to merge into production branch.
+Remember to code with a cloned repo and not a forked repo. this causes issues with syncing and pulling.
 
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript and enable type-aware lint rules. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+Thank you for your contributions!
