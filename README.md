@@ -1,7 +1,7 @@
 UPDATES:
 
-- main is updated thuesday 18th, 2025. 00:44 ( remember to pull)
-- production is updated thursday 19th, 2025. 00:44 ( remember to pull)
+- main is updated tuesday 18th, 2025. 00:44 ( remember to pull)
+- production is updated tuesday 18th, 2025. 00:44 ( remember to pull)
 
 LAST CHANGES:
  - Production branch fixed file structure issues with nested folders. we had a duplicate with critix x2. this is fixed.
