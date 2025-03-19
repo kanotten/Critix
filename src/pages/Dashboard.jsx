@@ -1,11 +1,13 @@
-import React, { Component } from 'react'
+import MainLayout from "../layouts/MainLayout";
 
-export default class Dashboard extends Component {
-  render() {
-    return (
-      <div>
-        
+const Dashboard = () => {
+  return (
+    <MainLayout>
+      <div className="p-4">
+        <h1 className="text-2xl font-bold">Dashboard</h1>
       </div>
-    )
-  }
-}
+    </MainLayout>
+  );
+};
+
+export default Dashboard;
