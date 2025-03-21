@@ -1,6 +1,5 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
-import MainLayout from "../layouts/MainLayout";
 
 const Home = () => {
   const [movies, setMovies] = useState([]);
@@ -45,64 +44,62 @@ const Home = () => {
     );
 
   return (
-    <MainLayout>
-      <div className="px-6 py-10 bg-gray-100 min-h-screen">
-        {/* Carousel Section */}
-        <h2 className="text-3xl font-bold text-gray-800 mb-8 text-center">
-          🔥 Featured Movie
-        </h2>
-        {movies.length > 0 && (
-          <div className="flex justify-center items-center gap-6 mb-14">
-            <button
-              onClick={handlePrev}
-              className="text-3xl px-4 py-2 bg-white rounded-full shadow hover:bg-gray-200 transition"
-            >
-              ←
-            </button>
-            <div className="text-center">
-              <img
-                src={movies[carouselIndex].poster}
-                alt={movies[carouselIndex].title}
-                className="h-96 w-64 object-cover rounded-xl shadow-lg mx-auto mb-4"
-              />
-              <p className="text-xl font-semibold text-gray-700">
-                {movies[carouselIndex].title}
-              </p>
-            </div>
-            <button
-              onClick={handleNext}
-              className="text-3xl px-4 py-2 bg-white rounded-full shadow hover:bg-gray-200 transition"
-            >
-              →
-            </button>
+    <div className="px-6 py-10 bg-gray-100 min-h-screen">
+      {/* Carousel Section */}
+      <h2 className="text-3xl font-bold text-gray-800 mb-8 text-center">
+        🔥 Featured Movie
+      </h2>
+      {movies.length > 0 && (
+        <div className="flex justify-center items-center gap-6 mb-14">
+          <button
+            onClick={handlePrev}
+            className="text-3xl px-4 py-2 bg-white rounded-full shadow hover:bg-gray-200 transition"
+          >
+            ←
+          </button>
+          <div className="text-center">
+            <img
+              src={movies[carouselIndex].poster}
+              alt={movies[carouselIndex].title}
+              className="h-96 w-64 object-cover rounded-xl shadow-lg mx-auto mb-4"
+            />
+            <p className="text-xl font-semibold text-gray-700">
+              {movies[carouselIndex].title}
+            </p>
           </div>
-        )}
-
-        {/* Grid Section */}
-        <h1 className="text-4xl font-bold text-center mb-10 text-gray-800">
-          🎬 Movie List
-        </h1>
-        <div className="grid gap-8 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-          {movies.map((movie) => (
-            <div
-              key={movie._id}
-              className="bg-white rounded-2xl shadow-lg overflow-hidden transition-transform hover:scale-105"
-            >
-              <img
-                src={movie.poster}
-                alt={movie.title}
-                className="w-full h-72 object-cover"
-              />
-              <div className="p-4">
-                <h3 className="text-lg font-semibold text-gray-700 truncate">
-                  {movie.title}
-                </h3>
-              </div>
-            </div>
-          ))}
+          <button
+            onClick={handleNext}
+            className="text-3xl px-4 py-2 bg-white rounded-full shadow hover:bg-gray-200 transition"
+          >
+            →
+          </button>
         </div>
+      )}
+
+      {/* Grid Section */}
+      <h1 className="text-4xl font-bold text-center mb-10 text-gray-800">
+        🎬 Movie List
+      </h1>
+      <div className="grid gap-8 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+        {movies.map((movie) => (
+          <div
+            key={movie._id}
+            className="bg-white rounded-2xl shadow-lg overflow-hidden transition-transform hover:scale-105"
+          >
+            <img
+              src={movie.poster}
+              alt={movie.title}
+              className="w-full h-72 object-cover"
+            />
+            <div className="p-4">
+              <h3 className="text-lg font-semibold text-gray-700 truncate">
+                {movie.title}
+              </h3>
+            </div>
+          </div>
+        ))}
       </div>
-    </MainLayout>
+    </div>
   );
 };
 
