@@ -1,11 +1,19 @@
-import React, { Component } from 'react'
+import React, { useState } from 'react';
+import NavWithPosters from '../components/NavWithPosters';
+import Footer from '../components/Footer';
 
-export default class Layout extends Component {
-  render() {
-    return (
-      <div>
-        
-      </div>
-    )
-  }
-}
+const Layout = ({ children }) => {
+  const [darkMode, setDarkMode] = useState(false);
+
+  return (
+    <div className={`${darkMode ? 'bg-black text-white' : 'bg-white text-black'} min-h-screen transition-colors duration-500`}>
+      <NavWithPosters darkMode={darkMode} setDarkMode={setDarkMode} />
+      
+      <main className="p-4">{children}</main>
+      
+      <Footer darkMode={darkMode} />
+    </div>
+  );
+};
+
+export default Layout;
