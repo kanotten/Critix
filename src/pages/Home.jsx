@@ -20,6 +20,7 @@ const Home = () => {
       .then((res) => {
         setMovies(res.data);
         setLoading(false);
+        console.log(res.data);
       })
       .catch((error) => {
         console.error("Error fetching movies:", error);
