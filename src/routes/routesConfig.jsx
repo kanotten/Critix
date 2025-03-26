@@ -5,6 +5,8 @@ import NotFound from "../pages/NotFound.jsx";
 
 const routes = [
   { path: "/", element: <Home /> },
+  { path: "/login", element: <Login /> },
+  { path: "/register", element: <Register /> },
   { path: "/dashboard", element: <Dashboard /> },
   { path: "/movie/:id", element: <MovieDetails /> },
   { path: "*", element: <NotFound /> },
