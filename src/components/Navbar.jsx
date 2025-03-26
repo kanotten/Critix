@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import CritiXLogo from './CritiXLogo';
 import SearchBar from './SearchBar';
 
 const Navbar = () => {
