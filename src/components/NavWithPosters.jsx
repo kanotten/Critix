@@ -119,8 +119,8 @@ const NavWithPosters = ({ darkMode, setDarkMode }) => {
       <AnimatePresence mode="wait">
         <motion.div
           key={imageIndex + bgIndex}
-          initial={{ opacity: 1 }}
-          animate={{ opacity: 2 }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.8 }}
           className={`absolute inset-0 ${overlayClass} z-0`}
