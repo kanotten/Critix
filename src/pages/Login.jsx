@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { jwtDecode } from "jwt-decode";
-
+import { jwtDecode } from "jwt-decode"; // Correct import
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -15,20 +14,18 @@ const Login = () => {
     e.preventDefault();
     setError(null);
 
-    const endpoint = isAdmin
-      ? "/api/auth/admin-login"
-      : "/api/auth/user-login";
+    const endpoint = isAdmin ? "/api/auth/admin-login" : "/api/auth/user-login";
 
     try {
       const response = await axios.post(
         `https://critix-backend.onrender.com${endpoint}`,
-        { email, password }
+        { email, password },
       );
 
       const { token } = response.data;
       localStorage.setItem("token", token);
 
-      const decoded = jwtDecode(token); 
+      const decoded = jwtDecode(token); // Decode the JWT token
 
       if (decoded.role === "admin") {
         navigate("/dashboard");
@@ -46,7 +43,9 @@ const Login = () => {
       <div className="bg-white p-8 rounded shadow-lg w-full max-w-md">
         <h2 className="text-2xl font-semibold text-center mb-4">Login</h2>
 
-        {error && <p className="text-red-500 text-sm mb-4 text-center">{error}</p>}
+        {error && (
+          <p className="text-red-500 text-sm mb-4 text-center">{error}</p>
+        )}
 
         <form onSubmit={handleLogin} className="space-y-4">
           <div>
