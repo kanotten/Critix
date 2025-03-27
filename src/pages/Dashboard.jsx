@@ -8,7 +8,7 @@ const Dashboard = () => {
         description: '',
         genre: '',
         releaseYear: '',
-        image: '',
+        poster: '',
     });
 
     const [error, setError] = useState('');
@@ -55,7 +55,7 @@ const Dashboard = () => {
                 description: '',
                 genre: '',
                 releaseYear: '',
-                image: '',
+                poster: '',
             });
 
             setSuccessMessage('Movie created successfully!');
@@ -208,14 +208,14 @@ const Dashboard = () => {
                         </div>
 
                         <div>
-                            <label htmlFor="image" className="block text-sm font-medium text-gray-700">
-                                Image URL
+                            <label htmlFor="poster" className="block text-sm font-medium text-gray-700">
+                                Poster URL
                             </label>
                             <input
                                 type="url"
-                                id="image"
-                                name="image"
-                                value={formData.image}
+                                id="poster"
+                                name="poster"
+                                value={formData.poster}
                                 onChange={handleInputChange}
                                 className="mt-1 p-2 w-full border border-gray-300 rounded-md"
                                 required

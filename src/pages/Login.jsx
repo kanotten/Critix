@@ -26,7 +26,7 @@ const Login = () => {
         setToken('');
 
         try {
-            const response = await axios.post('http://localhost:1337/api/auth/login', {
+            const response = await axios.post('http://localhost:1337/api/auth/admin-login', {
                 email,
                 password,
             });
@@ -60,7 +60,7 @@ const Login = () => {
                 </Link>
             </button>
             <div className="bg-white p-8 rounded-lg shadow-md w-96">
-                <h2 className="text-2xl font-bold text-center mb-6">Login to Get JWT Token</h2>
+                <h2 className="text-2xl font-bold text-center mb-6">ADMIN LOGIN</h2>
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div className="flex flex-col">
                         <label htmlFor="email" className="text-sm font-semibold text-gray-700">Email</label>
