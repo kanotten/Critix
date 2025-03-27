@@ -1,5 +1,4 @@
-import Navbar from "../components/Navbar";
-
+import Navbar from "../components/NavWithPoster";
 const MovieDetailsLayout = ({ children }) => {
   return (
     <div className="min-h-screen flex flex-col">
