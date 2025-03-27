@@ -1,13 +1,17 @@
 import React, { useState, useEffect, useMemo } from 'react';
+// eslint-disable-next-line no-unused-vars
 import { AnimatePresence, motion } from 'framer-motion';
 import CritiXLogo from './CritiXLogo';
 import SearchBar from './SearchBar';
 import axios from 'axios';
+import useAuthStore from "../store/auth";
 
 const NavWithPosters = ({ darkMode, setDarkMode }) => {
   const [moviesWithPosters, setMoviesWithPosters] = useState([]);
   const [imageIndex, setImageIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
+
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated); // ✅ Hent auth-status
 
   useEffect(() => {
     axios.get('https://critix-backend.onrender.com/api/movies')
@@ -20,7 +24,6 @@ const NavWithPosters = ({ darkMode, setDarkMode }) => {
       });
   }, []);
 
-  // Automatisk bilde-rotasjon
   useEffect(() => {
     if (isHovered || moviesWithPosters.length === 0) return;
 
@@ -50,7 +53,7 @@ const NavWithPosters = ({ darkMode, setDarkMode }) => {
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <AnimatePresence mode="wait">
+      <AnimatePresence mode="wait"> 
         <motion.div
           key={imageIndex}
           initial={{ opacity: 0 }}
@@ -78,12 +81,20 @@ const NavWithPosters = ({ darkMode, setDarkMode }) => {
       <div className="relative z-10 flex flex-col items-center space-y-2 mt-60">
         <SearchBar />
         <ul className="hidden md:flex flex-wrap justify-center space-x-4 mt-24 bg-black bg-opacity-60 p-2">
-          <li><button className="text-white px-4 py-1 rounded hover:bg-gray-700 transition">Home</button></li>
-          <li><button className="text-white px-4 py-1 rounded hover:bg-gray-700 transition">Last Reviews</button></li>
-          <li><button className="text-white px-4 py-1 rounded hover:bg-gray-700 transition">Movies</button></li>
-          <li><button className="text-white px-4 py-1 rounded hover:bg-gray-700 transition">Best Reviews</button></li>
-          <li><button className="text-white px-4 py-1 rounded hover:bg-gray-700 transition">About Us</button></li>
-          <li><button className="text-white px-4 py-1 rounded hover:bg-gray-700 transition">Sign in</button></li>
+          <li>
+            <button className="text-white px-4 py-1 rounded hover:bg-gray-700 transition">
+              Home
+            </button>
+          </li>
+
+          {/* ✅ Vis Dashboard bare hvis logget inn */}
+          {isAuthenticated && (
+            <li>
+              <button className="text-white px-4 py-1 rounded hover:bg-gray-700 transition">
+                Dashboard
+              </button>
+            </li>
+          )}
         </ul>
       </div>
     </nav>
