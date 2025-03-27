@@ -7,7 +7,7 @@ const MovieDetailsLayout = ({ children }) => {
 
       <main className="flex-1 flex flex-col">
         <section className="flex flex-wrap md:flex-nowrap gap-8 p-4">
-          <div className="flex-1"></div>
+          
           <div className="flex-1">{children}</div>
         </section>
 
