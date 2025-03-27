@@ -50,7 +50,7 @@ const NavWithPosters = ({ darkMode, setDarkMode }) => {
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <AnimatePresence mode="wait">
+      <AnimatePresence mode="wait"> 
         <motion.div
           key={imageIndex}
           initial={{ opacity: 0 }}
@@ -79,11 +79,7 @@ const NavWithPosters = ({ darkMode, setDarkMode }) => {
         <SearchBar />
         <ul className="hidden md:flex flex-wrap justify-center space-x-4 mt-24 bg-black bg-opacity-60 p-2">
           <li><button className="text-white px-4 py-1 rounded hover:bg-gray-700 transition">Home</button></li>
-          <li><button className="text-white px-4 py-1 rounded hover:bg-gray-700 transition">Last Reviews</button></li>
-          <li><button className="text-white px-4 py-1 rounded hover:bg-gray-700 transition">Movies</button></li>
-          <li><button className="text-white px-4 py-1 rounded hover:bg-gray-700 transition">Best Reviews</button></li>
-          <li><button className="text-white px-4 py-1 rounded hover:bg-gray-700 transition">About Us</button></li>
-          <li><button className="text-white px-4 py-1 rounded hover:bg-gray-700 transition">Sign in</button></li>
+          
         </ul>
       </div>
     </nav>
