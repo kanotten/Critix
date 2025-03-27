@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+// eslint-disable-next-line no-unused-vars
 import { AnimatePresence, motion } from 'framer-motion';
 import CritiXLogo from './CritiXLogo';
 import SearchBar from './SearchBar';
