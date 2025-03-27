@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { urlFor } from "../api/sanity";
+import Comments from "../components/Comments";
+
 
 const MovieDetails = () => {
   const { id } = useParams();
@@ -108,6 +110,9 @@ const MovieDetails = () => {
           </div>
         </div>
       </div>
+      {/* Comments Section */}
+      {movie && <Comments movieId={movie._id} />}
+
     </div>
   );
 };
