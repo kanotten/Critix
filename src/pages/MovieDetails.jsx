@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { urlFor } from "../api/sanity";
 import Comments from "../components/Comments";
+import Rating from "../components/Rating";
 
 
 const MovieDetails = () => {
@@ -110,9 +111,10 @@ const MovieDetails = () => {
           </div>
         </div>
       </div>
+      <Rating movieId={movie._id} />
       {/* Comments Section */}
       {movie && <Comments movieId={movie._id} />}
-
+  
     </div>
   );
 };
