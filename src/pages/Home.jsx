@@ -1,11 +1,19 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import MovieCard from "../components/MovieCard";
 
 const Home = () => {
   const [movies, setMovies] = useState([]);
   const [carouselIndex, setCarouselIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  const navigate = useNavigate();
+
+  const handleMovieClick = (id) => {
+    navigate(`/movie/${id}`);
+  };
 
   useEffect(() => {
     axios
@@ -82,21 +90,7 @@ const Home = () => {
       </h1>
       <div className="grid gap-8 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
         {movies.map((movie) => (
-          <div
-            key={movie._id}
-            className="bg-white rounded-2xl shadow-lg overflow-hidden transition-transform hover:scale-105"
-          >
-            <img
-              src={movie.poster}
-              alt={movie.title}
-              className="w-full h-72 object-cover"
-            />
-            <div className="p-4">
-              <h3 className="text-lg font-semibold text-gray-700 truncate">
-                {movie.title}
-              </h3>
-            </div>
-          </div>
+          <MovieCard key={movie._id} movie={movie} onClick={handleMovieClick} />
         ))}
       </div>
     </div>
