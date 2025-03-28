@@ -4,7 +4,7 @@ import axios from "axios";
 import { urlFor } from "../api/sanity";
 import Comments from "../components/Comments";
 import Rating from "../components/Rating";
-
+import Navbar from "../components/NavWithPoster"; // Added from production branch
 
 const MovieDetails = () => {
   const { id } = useParams();
@@ -49,6 +49,10 @@ const MovieDetails = () => {
 
   return (
     <div className="max-w-6xl mx-auto p-4 sm:p-6 lg:p-8">
+      {/* Navbar from production branch */}
+      <Navbar />
+
+      {/* Back Button */}
       <button
         onClick={() => navigate("/")}
         className="mb-6 text-blue-600 hover:underline"
@@ -114,7 +118,6 @@ const MovieDetails = () => {
       <Rating movieId={movie._id} />
       {/* Comments Section */}
       {movie && <Comments movieId={movie._id} />}
-  
     </div>
   );
 };
