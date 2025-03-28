@@ -1,6 +1,6 @@
 import React from "react";
-import { Link, useNavigate } from "react-router-dom"; // Import Link and useNavigate
-import { AnimatePresence, motion } from "framer-motion";
+import { Link, useNavigate } from "react-router-dom";
+import { AnimatePresence, motion } from "framer-motion"; // eslint-disable-line no-unused-vars
 import CritiXLogo from "./CritiXLogo";
 import SearchBar from "./SearchBar";
 import axios from "axios";
@@ -13,7 +13,6 @@ const NavWithPosters = () => {
 
   // Zustand auth state and functions
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
-  console.log("isAuthenticated:", isAuthenticated); // Debugging line
   const logout = useAuthStore((state) => state.logout); // Logout function
   const navigate = useNavigate(); // For navigation
 
