@@ -8,6 +8,8 @@ const Home = () => {
   const [carouselIndex, setCarouselIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [currentPage, setCurrentPage] = useState(0);
+  const moviesPerPage = 10; // Antall filmer per side
 
   const navigate = useNavigate();
 
@@ -50,6 +52,10 @@ const Home = () => {
         <h2 className="text-2xl font-semibold text-red-600">{error}</h2>
       </div>
     );
+  const moviesToDisplay = movies.slice(
+    currentPage * moviesPerPage,
+    (currentPage + 1) * moviesPerPage
+  );
 
   return (
     <div className="px-6 py-10 bg-gray-100 min-h-screen">
@@ -89,9 +95,25 @@ const Home = () => {
         🎬 Movie List
       </h1>
       <div className="grid gap-8 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-        {movies.map((movie) => (
+        {moviesToDisplay.map((movie) => (
           <MovieCard key={movie._id} movie={movie} onClick={handleMovieClick} />
         ))}
+      </div>
+      <div className="flex justify-center gap-4 my-10">
+        <button
+          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 0))}
+          disabled={currentPage === 0}
+          className="bg-gray-200 px-4 py-2 rounded shadow hover:bg-gray-300 disabled:opacity-50"
+        >
+          Previous
+        </button>
+        <button
+          onClick={() => setCurrentPage((prev) => prev + 1)}
+          disabled={(currentPage + 1) * moviesPerPage >= movies.length}
+          className="bg-gray-200 px-4 py-2 rounded shadow hover:bg-gray-300 disabled:opacity-50"
+        >
+          Next
+        </button>
       </div>
     </div>
   );
