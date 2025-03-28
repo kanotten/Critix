@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode"; // Correct import
+import useAuthStore from "../store/auth"; // Import Zustand store
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -9,6 +10,7 @@ const Login = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
+  const login = useAuthStore((state) => state.login); // Access the login function
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -23,10 +25,12 @@ const Login = () => {
       );
 
       const { token } = response.data;
-      localStorage.setItem("token", token);
-
       const decoded = jwtDecode(token); // Decode the JWT token
 
+      // Call the login function to update the global state
+      login(token, decoded.role, decoded.email);
+
+      // Redirect based on user role
       if (decoded.role === "admin") {
         navigate("/dashboard");
       } else {
