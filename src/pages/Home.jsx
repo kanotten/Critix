@@ -6,6 +6,8 @@ import SearchBar from "../components/SearchBar";
 
 const Home = () => {
   const [searchQuery, setSearchQuery] = useState("");
+  const [genre, setGenre] = useState("");
+
   const [movies, setMovies] = useState([]);
   const [carouselIndex, setCarouselIndex] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -54,9 +56,13 @@ const Home = () => {
         <h2 className="text-2xl font-semibold text-red-600">{error}</h2>
       </div>
     );
-  const filteredMovies = movies.filter((movie) =>
-    movie.title.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredMovies = movies.filter((movie) => {
+    const matchesTitle = movie.title
+      .toLowerCase()
+      .includes(searchQuery.toLowerCase());
+    const matchesGenre = genre ? movie.genre === genre : true;
+    return matchesTitle && matchesGenre;
+  });
 
   const moviesToDisplay = filteredMovies.slice(
     currentPage * moviesPerPage,
@@ -95,7 +101,12 @@ const Home = () => {
           </button>
         </div>
       )}
-      <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
+      <SearchBar
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        genre={genre}
+        setGenre={setGenre}
+      />
 
       {/* Grid Section */}
       <h1 className="text-4xl font-bold text-center mb-10 text-gray-800">
