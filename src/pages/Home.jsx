@@ -7,7 +7,7 @@ import SearchBar from "../components/SearchBar";
 const Home = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [genre, setGenre] = useState("");
-
+  const [releaseYear, setReleaseYear] = useState("");
   const [movies, setMovies] = useState([]);
   const [carouselIndex, setCarouselIndex] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -61,12 +61,19 @@ const Home = () => {
       .toLowerCase()
       .includes(searchQuery.toLowerCase());
     const matchesGenre = genre ? movie.genre === genre : true;
-    return matchesTitle && matchesGenre;
+    const matchesYear = releaseYear ? movie.releaseYear === releaseYear : true;
+    return matchesTitle && matchesGenre && matchesYear;
   });
 
   const moviesToDisplay = filteredMovies.slice(
     currentPage * moviesPerPage,
     (currentPage + 1) * moviesPerPage
+  );
+  const genres = [...new Set(movies.map((movie) => movie.genre))].filter(
+    Boolean
+  );
+  const years = [...new Set(movies.map((movie) => movie.releaseYear))].filter(
+    Boolean
   );
 
   return (
@@ -106,6 +113,10 @@ const Home = () => {
         setSearchQuery={setSearchQuery}
         genre={genre}
         setGenre={setGenre}
+        releaseYear={releaseYear}
+        setReleaseYear={setReleaseYear}
+        genres={genres}
+        years={years}
       />
 
       {/* Grid Section */}

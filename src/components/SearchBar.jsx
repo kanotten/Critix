@@ -1,6 +1,15 @@
 import React from "react";
 
-const SearchBar = ({ searchQuery, setSearchQuery, genre, setGenre }) => {
+const SearchBar = ({
+  searchQuery,
+  setSearchQuery,
+  genre,
+  setGenre,
+  releaseYear,
+  setReleaseYear,
+  genres,
+  years,
+}) => {
   return (
     <div className="flex justify-center mb-8">
       <input
@@ -17,11 +26,24 @@ const SearchBar = ({ searchQuery, setSearchQuery, genre, setGenre }) => {
         className="px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring focus:border-blue-300"
       >
         <option value="">All Genres</option>
-        <option value="Action">Action</option>
-        <option value="Comedy">Comedy</option>
-        <option value="Drama">Drama</option>
-        <option value="NOeggs">NOeggs</option>
-        {/* legg til flere hvis ønskelig */}
+        {(genres || []).map((g) => (
+          <option key={g} value={g}>
+            {g}
+          </option>
+        ))}
+      </select>
+      <select
+        value={releaseYear}
+        onChange={(e) => setReleaseYear(e.target.value)}
+        className="px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring focus:border-blue-300"
+      >
+        <option value="">All Years</option>
+
+        {(years || []).map((y) => (
+          <option key={y} value={y}>
+            {y}
+          </option>
+        ))}
       </select>
     </div>
   );
