@@ -4,7 +4,6 @@ import axios from "axios";
 import { urlFor } from "../api/sanity";
 import Comments from "../components/Comments";
 import Rating from "../components/Rating";
-import Navbar from "../components/NavWithPoster"; // Added from production branch
 
 const MovieDetails = () => {
   const { id } = useParams();
@@ -17,7 +16,7 @@ const MovieDetails = () => {
     const fetchMovieDetails = async () => {
       try {
         const { data } = await axios.get(
-          `https://critix-backend.onrender.com/api/movies/${id}`
+          `https://critix-backend.onrender.com/api/movies/${id}`,
         );
         setMovie(data);
       } catch (err) {
@@ -49,9 +48,6 @@ const MovieDetails = () => {
 
   return (
     <div className="max-w-6xl mx-auto p-4 sm:p-6 lg:p-8">
-      {/* Navbar from production branch */}
-      <Navbar />
-
       {/* Back Button */}
       <button
         onClick={() => navigate("/")}
@@ -80,8 +76,12 @@ const MovieDetails = () => {
           </p>
 
           <div className="text-sm text-gray-600 space-y-2">
-            <p><strong>Release Year:</strong> {movie?.releaseYear || "N/A"}</p>
-            <p><strong>Genre:</strong> {movie?.genre || "N/A"}</p>
+            <p>
+              <strong>Release Year:</strong> {movie?.releaseYear || "N/A"}
+            </p>
+            <p>
+              <strong>Genre:</strong> {movie?.genre || "N/A"}
+            </p>
           </div>
 
           <div className="mt-6">
@@ -90,7 +90,8 @@ const MovieDetails = () => {
               {movie?.castMembers?.length > 0 ? (
                 movie.castMembers.map((cast, i) => (
                   <li key={i}>
-                    <strong>{cast.characterName}</strong>: {cast.person?.name || "Unknown"}
+                    <strong>{cast.characterName}</strong>:{" "}
+                    {cast.person?.name || "Unknown"}
                   </li>
                 ))
               ) : (
@@ -105,7 +106,8 @@ const MovieDetails = () => {
               {movie?.crewMembers?.length > 0 ? (
                 movie.crewMembers.map((crew, i) => (
                   <li key={i}>
-                    <strong>{crew.job}</strong>: {crew.person?.name || "Unknown"}
+                    <strong>{crew.job}</strong>:{" "}
+                    {crew.person?.name || "Unknown"}
                   </li>
                 ))
               ) : (

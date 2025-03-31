@@ -1,18 +1,22 @@
-import React, { useEffect, useMemo, useState } from "react";
-// eslint-disable-next-line no-unused-vars
 import axios from "axios";
-import { AnimatePresence, motion } from "framer-motion";
-import useAuthStore from "../store/auth";
+import { AnimatePresence, motion } from "framer-motion"; // eslint-disable-line no-unused-vars
+import React from "react";
+import { Link, useNavigate } from "react-router-dom";
+import useAuthStore from "../store/auth"; // For authentication state
 import CritiXLogo from "./CritiXLogo";
 
-const NavWithPosters = ({ darkMode, setDarkMode }) => {
-  const [moviesWithPosters, setMoviesWithPosters] = useState([]);
-  const [imageIndex, setImageIndex] = useState(0);
-  const [isHovered, setIsHovered] = useState(false);
+const NavWithPosters = () => {
+  const [moviesWithPosters, setMoviesWithPosters] = React.useState([]);
+  const [imageIndex, setImageIndex] = React.useState(0);
+  const [isHovered, setIsHovered] = React.useState(false);
 
-  const isAuthenticated = useAuthStore((state) => state.isAuthenticated); // ✅ Hent auth-status
+  // Zustand auth state and functions
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const logout = useAuthStore((state) => state.logout); // Logout function
+  const navigate = useNavigate(); // For navigation
 
-  useEffect(() => {
+  // Fetch movies with posters
+  React.useEffect(() => {
     axios
       .get("https://critix-backend.onrender.com/api/movies")
       .then((res) => {
@@ -26,7 +30,8 @@ const NavWithPosters = ({ darkMode, setDarkMode }) => {
       });
   }, []);
 
-  useEffect(() => {
+  // Auto-cycle posters
+  React.useEffect(() => {
     if (isHovered || moviesWithPosters.length === 0) return;
 
     const interval = setInterval(() => {
@@ -38,16 +43,13 @@ const NavWithPosters = ({ darkMode, setDarkMode }) => {
 
   const currentPoster = moviesWithPosters[imageIndex]?.poster;
 
-  const bgStyle = useMemo(
-    () => ({
-      backgroundImage: `url(${currentPoster})`,
-      backgroundSize: "cover",
-      backgroundPosition: "center 30%",
-      backgroundRepeat: "no-repeat",
-      transition: "background-image 0.8s ease-in-out",
-    }),
-    [currentPoster]
-  );
+  const bgStyle = {
+    backgroundImage: `url(${currentPoster})`,
+    backgroundSize: "cover",
+    backgroundPosition: "center 30%",
+    backgroundRepeat: "no-repeat",
+    transition: "background-image 0.8s ease-in-out",
+  };
 
   const overlayClass = "bg-gradient-to-b from-black/50 to-black/70";
 
@@ -70,17 +72,19 @@ const NavWithPosters = ({ darkMode, setDarkMode }) => {
         />
       </AnimatePresence>
 
-      {/* Dark Mode Toggle */}
+      {/* Login/Logout Button */}
       <button
-        onClick={() => setDarkMode(!darkMode)}
-        className={`absolute top-4 right-2 text-xs px-3 py-1 rounded transition z-10 
-        ${
-          darkMode
-            ? "bg-white text-black hover:bg-gray-300"
-            : "bg-black text-white hover:bg-gray-800"
-        }`}
+        onClick={() => {
+          if (isAuthenticated) {
+            logout(); // Call logout function
+            navigate("/"); // Redirect to home after logout
+          } else {
+            navigate("/login"); // Redirect to login page
+          }
+        }}
+        className="absolute top-4 right-2 text-xs px-3 py-1 rounded transition z-10 bg-black text-white hover:bg-gray-800"
       >
-        {darkMode ? "Light Mode" : "Dark Mode"}
+        {isAuthenticated ? "Logout" : "Login"}
       </button>
 
       {/* Logo */}
@@ -88,22 +92,29 @@ const NavWithPosters = ({ darkMode, setDarkMode }) => {
         <CritiXLogo size={120} />
       </div>
 
-      {/* Innhold */}
+      {/* Navigation Links */}
       <div className="relative z-10 flex flex-col items-center space-y-2 mt-60">
-        {/*<SearchBar />*/}
+        {/* <SearchBar />*/}
         <ul className="hidden md:flex flex-wrap justify-center space-x-4 mt-24 bg-black bg-opacity-60 p-2">
+          {/* Home Link */}
           <li>
-            <button className="text-white px-4 py-1 rounded hover:bg-gray-700 transition">
+            <Link
+              to="/"
+              className="text-white px-4 py-1 rounded hover:bg-gray-700 transition"
+            >
               Home
-            </button>
+            </Link>
           </li>
 
-          {/* ✅ Vis Dashboard bare hvis logget inn */}
+          {/* Dashboard Link (only visible if logged in) */}
           {isAuthenticated && (
             <li>
-              <button className="text-white px-4 py-1 rounded hover:bg-gray-700 transition">
+              <Link
+                to="/dashboard"
+                className="text-white px-4 py-1 rounded hover:bg-gray-700 transition"
+              >
                 Dashboard
-              </button>
+              </Link>
             </li>
           )}
         </ul>
