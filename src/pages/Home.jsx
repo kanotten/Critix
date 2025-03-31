@@ -2,8 +2,10 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import MovieCard from "../components/MovieCard";
+import SearchBar from "../components/SearchBar";
 
 const Home = () => {
+  const [searchQuery, setSearchQuery] = useState("");
   const [movies, setMovies] = useState([]);
   const [carouselIndex, setCarouselIndex] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -52,7 +54,11 @@ const Home = () => {
         <h2 className="text-2xl font-semibold text-red-600">{error}</h2>
       </div>
     );
-  const moviesToDisplay = movies.slice(
+  const filteredMovies = movies.filter((movie) =>
+    movie.title.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const moviesToDisplay = filteredMovies.slice(
     currentPage * moviesPerPage,
     (currentPage + 1) * moviesPerPage
   );
@@ -89,6 +95,7 @@ const Home = () => {
           </button>
         </div>
       )}
+      <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
 
       {/* Grid Section */}
       <h1 className="text-4xl font-bold text-center mb-10 text-gray-800">
@@ -109,7 +116,7 @@ const Home = () => {
         </button>
         <button
           onClick={() => setCurrentPage((prev) => prev + 1)}
-          disabled={(currentPage + 1) * moviesPerPage >= movies.length}
+          disabled={(currentPage + 1) * moviesPerPage >= filteredMovies.length}
           className="bg-gray-200 px-4 py-2 rounded shadow hover:bg-gray-300 disabled:opacity-50"
         >
           Next
