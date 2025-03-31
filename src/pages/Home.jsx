@@ -90,7 +90,10 @@ const Home = () => {
           >
             ←
           </button>
-          <div className="text-center">
+          <div
+            className="text-center cursor-pointer transform transition duration-300 hover:scale-105 hover:shadow-2xl"
+            onClick={() => handleMovieClick(movies[carouselIndex]._id)}
+          >
             <img
               src={movies[carouselIndex].poster}
               alt={movies[carouselIndex].title}
