@@ -1,10 +1,9 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from "react";
 // eslint-disable-next-line no-unused-vars
-import { AnimatePresence, motion } from 'framer-motion';
-import CritiXLogo from './CritiXLogo';
-import SearchBar from './SearchBar';
-import axios from 'axios';
+import axios from "axios";
+import { AnimatePresence, motion } from "framer-motion";
 import useAuthStore from "../store/auth";
+import CritiXLogo from "./CritiXLogo";
 
 const NavWithPosters = ({ darkMode, setDarkMode }) => {
   const [moviesWithPosters, setMoviesWithPosters] = useState([]);
@@ -14,9 +13,12 @@ const NavWithPosters = ({ darkMode, setDarkMode }) => {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated); // ✅ Hent auth-status
 
   useEffect(() => {
-    axios.get('https://critix-backend.onrender.com/api/movies')
+    axios
+      .get("https://critix-backend.onrender.com/api/movies")
       .then((res) => {
-        const validPosters = res.data.filter(movie => movie.poster && movie.poster.trim() !== '');
+        const validPosters = res.data.filter(
+          (movie) => movie.poster && movie.poster.trim() !== ""
+        );
         setMoviesWithPosters(validPosters);
       })
       .catch((err) => {
@@ -36,15 +38,18 @@ const NavWithPosters = ({ darkMode, setDarkMode }) => {
 
   const currentPoster = moviesWithPosters[imageIndex]?.poster;
 
-  const bgStyle = useMemo(() => ({
-    backgroundImage: `url(${currentPoster})`,
-    backgroundSize: 'cover',
-    backgroundPosition: 'center 30%',
-    backgroundRepeat: 'no-repeat',
-    transition: 'background-image 0.8s ease-in-out'
-  }), [currentPoster]);
+  const bgStyle = useMemo(
+    () => ({
+      backgroundImage: `url(${currentPoster})`,
+      backgroundSize: "cover",
+      backgroundPosition: "center 30%",
+      backgroundRepeat: "no-repeat",
+      transition: "background-image 0.8s ease-in-out",
+    }),
+    [currentPoster]
+  );
 
-  const overlayClass = 'bg-gradient-to-b from-black/50 to-black/70';
+  const overlayClass = "bg-gradient-to-b from-black/50 to-black/70";
 
   return (
     <nav
@@ -53,7 +58,7 @@ const NavWithPosters = ({ darkMode, setDarkMode }) => {
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <AnimatePresence mode="wait"> 
+      <AnimatePresence mode="wait">
         <motion.div
           key={imageIndex}
           initial={{ opacity: 0 }}
@@ -66,10 +71,16 @@ const NavWithPosters = ({ darkMode, setDarkMode }) => {
       </AnimatePresence>
 
       {/* Dark Mode Toggle */}
-      <button onClick={() => setDarkMode(!darkMode)}
+      <button
+        onClick={() => setDarkMode(!darkMode)}
         className={`absolute top-4 right-2 text-xs px-3 py-1 rounded transition z-10 
-        ${darkMode ? 'bg-white text-black hover:bg-gray-300' : 'bg-black text-white hover:bg-gray-800'}`}>
-        {darkMode ? 'Light Mode' : 'Dark Mode'}
+        ${
+          darkMode
+            ? "bg-white text-black hover:bg-gray-300"
+            : "bg-black text-white hover:bg-gray-800"
+        }`}
+      >
+        {darkMode ? "Light Mode" : "Dark Mode"}
       </button>
 
       {/* Logo */}
@@ -79,7 +90,7 @@ const NavWithPosters = ({ darkMode, setDarkMode }) => {
 
       {/* Innhold */}
       <div className="relative z-10 flex flex-col items-center space-y-2 mt-60">
-        <SearchBar />
+        {/*<SearchBar />*/}
         <ul className="hidden md:flex flex-wrap justify-center space-x-4 mt-24 bg-black bg-opacity-60 p-2">
           <li>
             <button className="text-white px-4 py-1 rounded hover:bg-gray-700 transition">
