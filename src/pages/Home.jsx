@@ -126,11 +126,22 @@ const Home = () => {
       <h1 className="text-4xl font-bold text-center mb-10 text-gray-800">
         🎬 Movie List
       </h1>
-      <div className="grid gap-8 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-        {moviesToDisplay.map((movie) => (
-          <MovieCard key={movie._id} movie={movie} onClick={handleMovieClick} />
-        ))}
-      </div>
+      {filteredMovies.length === 0 ? (
+        <div className="text-center mt-10 text-gray-600 text-lg">
+          😅 Oops! No movies found. Try adjusting your search or filters.
+        </div>
+      ) : (
+        <div className="grid gap-8 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+          {moviesToDisplay.map((movie) => (
+            <MovieCard
+              key={movie._id}
+              movie={movie}
+              onClick={handleMovieClick}
+            />
+          ))}
+        </div>
+      )}
+
       <div className="flex justify-center gap-4 my-10">
         <button
           onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 0))}
