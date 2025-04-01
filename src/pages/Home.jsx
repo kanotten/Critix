@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import MovieCard from "../components/MovieCard";
 import SearchBar from "../components/SearchBar";
+import Spinner from "../components/Spinner";
 
 const Home = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -13,7 +14,7 @@ const Home = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(0);
-  const moviesPerPage = 10; // Antall filmer per side
+  const [moviesPerPage, setMoviesPerPage] = useState(10);
 
   const navigate = useNavigate();
 
@@ -35,6 +36,22 @@ const Home = () => {
       });
   }, []);
 
+  useEffect(() => {
+    const updateMoviesPerPage = () => {
+      const width = window.innerWidth;
+
+      if (width >= 1280) setMoviesPerPage(15); // 5 columns × 3 rows
+      else if (width >= 1024) setMoviesPerPage(12); // 4 columns × 3 rows
+      else if (width >= 768) setMoviesPerPage(9); // 3 columns × 3 rows
+      else setMoviesPerPage(6); // 2 columns × 3 rows
+    };
+
+    updateMoviesPerPage(); // Kjør én gang først
+    window.addEventListener("resize", updateMoviesPerPage);
+
+    return () => window.removeEventListener("resize", updateMoviesPerPage);
+  }, []);
+
   const handlePrev = () => {
     setCarouselIndex((prev) => (prev === 0 ? movies.length - 1 : prev - 1));
   };
@@ -43,12 +60,7 @@ const Home = () => {
     setCarouselIndex((prev) => (prev === movies.length - 1 ? 0 : prev + 1));
   };
 
-  if (loading)
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        <h2 className="text-2xl font-semibold">Loading movies...</h2>
-      </div>
-    );
+  if (loading) return <Spinner />;
 
   if (error)
     return (
