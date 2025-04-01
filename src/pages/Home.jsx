@@ -21,6 +21,9 @@ const Home = () => {
   const handleMovieClick = (id) => {
     navigate(`/movie/${id}`);
   };
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [currentPage]);
 
   useEffect(() => {
     axios
