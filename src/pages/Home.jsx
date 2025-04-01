@@ -15,15 +15,34 @@ const Home = () => {
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(0);
   const [moviesPerPage, setMoviesPerPage] = useState(10);
+  const [userPaginated, setUserPaginated] = useState(false);
 
   const navigate = useNavigate();
+
+  const handleSearchChange = (value) => {
+    setSearchQuery(value);
+    setCurrentPage(0);
+  };
+
+  const handleGenreChange = (value) => {
+    setGenre(value);
+    setCurrentPage(0);
+  };
+
+  const handleYearChange = (value) => {
+    setReleaseYear(value);
+    setCurrentPage(0);
+  };
 
   const handleMovieClick = (id) => {
     navigate(`/movie/${id}`);
   };
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }, [currentPage]);
+    if (userPaginated) {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      setUserPaginated(false);
+    }
+  }, [currentPage, userPaginated]);
 
   useEffect(() => {
     axios
@@ -128,11 +147,11 @@ const Home = () => {
       )}
       <SearchBar
         searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
+        setSearchQuery={handleSearchChange}
         genre={genre}
-        setGenre={setGenre}
+        setGenre={handleGenreChange}
         releaseYear={releaseYear}
-        setReleaseYear={setReleaseYear}
+        setReleaseYear={handleYearChange}
         genres={genres}
         years={years}
       />
@@ -159,14 +178,20 @@ const Home = () => {
 
       <div className="flex justify-center gap-4 my-10">
         <button
-          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 0))}
+          onClick={() => {
+            setCurrentPage((prev) => Math.max(prev - 1, 0));
+            setUserPaginated(true);
+          }}
           disabled={currentPage === 0}
           className="bg-gray-200 px-4 py-2 rounded shadow hover:bg-gray-300 disabled:opacity-50"
         >
           Previous
         </button>
         <button
-          onClick={() => setCurrentPage((prev) => prev + 1)}
+          onClick={() => {
+            setCurrentPage((prev) => prev + 1);
+            setUserPaginated(true);
+          }}
           disabled={(currentPage + 1) * moviesPerPage >= filteredMovies.length}
           className="bg-gray-200 px-4 py-2 rounded shadow hover:bg-gray-300 disabled:opacity-50"
         >
