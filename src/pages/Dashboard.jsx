@@ -311,7 +311,7 @@ const Dashboard = () => {
 
               <button
                   type="submit"
-                  className="w-full bg-black text-white p-2 rounded-md hover:bg-gray-600"
+                  className="w-full bg-blue-500 text-white p-2 rounded-md hover:bg-gray-600"
               >
                 Create Movie
               </button>
@@ -456,7 +456,7 @@ const Dashboard = () => {
 
                   <button
                       type="submit"
-                      className="w-full bg-black text-white p-2 rounded-md hover:bg-gray-600"
+                      className="w-full bg-blue-500 text-white p-2 rounded-md hover:bg-gray-600"
                   >
                     Update Movie
                   </button>
