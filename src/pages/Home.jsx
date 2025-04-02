@@ -117,7 +117,7 @@ const Home = () => {
         🔥 Featured Movie
       </h2>
       {movies.length > 0 && (
-        <div className="flex justify-center items-center gap-6 mb-14">
+        <div className="flex justify-center items-center gap-2 sm:gap-6 mb-14 px-4">
           <button
             onClick={handlePrev}
             className="text-3xl px-4 py-2 bg-white rounded-full shadow hover:bg-gray-200 transition"
@@ -128,11 +128,14 @@ const Home = () => {
             className="text-center cursor-pointer transform transition duration-300 hover:scale-105 hover:shadow-2xl"
             onClick={() => handleMovieClick(movies[carouselIndex]._id)}
           >
-            <img
-              src={movies[carouselIndex].poster}
-              alt={movies[carouselIndex].title}
-              className="h-96 w-64 object-cover rounded-xl shadow-lg mx-auto mb-4"
-            />
+            <div className="relative w-64 h-96 sm:w-[22rem] sm:h-[32rem] bg-gray-200 rounded-xl shadow-lg overflow-hidden mx-auto mb-4">
+              <img
+                src={movies[carouselIndex].poster}
+                alt={movies[carouselIndex].title}
+                className="absolute inset-0 w-full h-full object-cover"
+              />
+            </div>
+
             <p className="text-xl font-semibold text-gray-700">
               {movies[carouselIndex].title}
             </p>
