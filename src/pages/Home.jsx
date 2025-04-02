@@ -2,18 +2,47 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import MovieCard from "../components/MovieCard";
+import SearchBar from "../components/SearchBar";
+import Spinner from "../components/Spinner";
 
 const Home = () => {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [genre, setGenre] = useState("");
+  const [releaseYear, setReleaseYear] = useState("");
   const [movies, setMovies] = useState([]);
   const [carouselIndex, setCarouselIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [moviesPerPage, setMoviesPerPage] = useState(10);
+  const [userPaginated, setUserPaginated] = useState(false);
 
   const navigate = useNavigate();
+
+  const handleSearchChange = (value) => {
+    setSearchQuery(value);
+    setCurrentPage(0);
+  };
+
+  const handleGenreChange = (value) => {
+    setGenre(value);
+    setCurrentPage(0);
+  };
+
+  const handleYearChange = (value) => {
+    setReleaseYear(value);
+    setCurrentPage(0);
+  };
 
   const handleMovieClick = (id) => {
     navigate(`/movie/${id}`);
   };
+  useEffect(() => {
+    if (userPaginated) {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      setUserPaginated(false);
+    }
+  }, [currentPage, userPaginated]);
 
   useEffect(() => {
     axios
@@ -29,6 +58,22 @@ const Home = () => {
       });
   }, []);
 
+  useEffect(() => {
+    const updateMoviesPerPage = () => {
+      const width = window.innerWidth;
+
+      if (width >= 1280) setMoviesPerPage(15); // 5 columns × 3 rows
+      else if (width >= 1024) setMoviesPerPage(12); // 4 columns × 3 rows
+      else if (width >= 768) setMoviesPerPage(9); // 3 columns × 3 rows
+      else setMoviesPerPage(6); // 2 columns × 3 rows
+    };
+
+    updateMoviesPerPage(); // Kjør én gang først
+    window.addEventListener("resize", updateMoviesPerPage);
+
+    return () => window.removeEventListener("resize", updateMoviesPerPage);
+  }, []);
+
   const handlePrev = () => {
     setCarouselIndex((prev) => (prev === 0 ? movies.length - 1 : prev - 1));
   };
@@ -37,12 +82,7 @@ const Home = () => {
     setCarouselIndex((prev) => (prev === movies.length - 1 ? 0 : prev + 1));
   };
 
-  if (loading)
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        <h2 className="text-2xl font-semibold">Loading movies...</h2>
-      </div>
-    );
+  if (loading) return <Spinner />;
 
   if (error)
     return (
@@ -50,6 +90,25 @@ const Home = () => {
         <h2 className="text-2xl font-semibold text-red-600">{error}</h2>
       </div>
     );
+  const filteredMovies = movies.filter((movie) => {
+    const matchesTitle = movie.title
+      .toLowerCase()
+      .includes(searchQuery.toLowerCase());
+    const matchesGenre = genre ? movie.genre === genre : true;
+    const matchesYear = releaseYear ? movie.releaseYear === releaseYear : true;
+    return matchesTitle && matchesGenre && matchesYear;
+  });
+
+  const moviesToDisplay = filteredMovies.slice(
+    currentPage * moviesPerPage,
+    (currentPage + 1) * moviesPerPage
+  );
+  const genres = [...new Set(movies.map((movie) => movie.genre))].filter(
+    Boolean
+  );
+  const years = [...new Set(movies.map((movie) => movie.releaseYear))].filter(
+    Boolean
+  );
 
   return (
     <div className="px-6 py-10 bg-gray-100 min-h-screen">
@@ -65,7 +124,10 @@ const Home = () => {
           >
             ←
           </button>
-          <div className="text-center">
+          <div
+            className="text-center cursor-pointer transform transition duration-300 hover:scale-105 hover:shadow-2xl"
+            onClick={() => handleMovieClick(movies[carouselIndex]._id)}
+          >
             <img
               src={movies[carouselIndex].poster}
               alt={movies[carouselIndex].title}
@@ -83,15 +145,58 @@ const Home = () => {
           </button>
         </div>
       )}
+      <SearchBar
+        searchQuery={searchQuery}
+        setSearchQuery={handleSearchChange}
+        genre={genre}
+        setGenre={handleGenreChange}
+        releaseYear={releaseYear}
+        setReleaseYear={handleYearChange}
+        genres={genres}
+        years={years}
+      />
 
       {/* Grid Section */}
       <h1 className="text-4xl font-bold text-center mb-10 text-gray-800">
         🎬 Movie List
       </h1>
-      <div className="grid gap-8 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-        {movies.map((movie) => (
-          <MovieCard key={movie._id} movie={movie} onClick={handleMovieClick} />
-        ))}
+      {filteredMovies.length === 0 ? (
+        <div className="text-center mt-10 text-gray-600 text-lg">
+          😅 Oops! No movies found. Try adjusting your search or filters.
+        </div>
+      ) : (
+        <div className="grid gap-8 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+          {moviesToDisplay.map((movie) => (
+            <MovieCard
+              key={movie._id}
+              movie={movie}
+              onClick={handleMovieClick}
+            />
+          ))}
+        </div>
+      )}
+
+      <div className="flex justify-center gap-4 my-10">
+        <button
+          onClick={() => {
+            setCurrentPage((prev) => Math.max(prev - 1, 0));
+            setUserPaginated(true);
+          }}
+          disabled={currentPage === 0}
+          className="bg-gray-200 px-4 py-2 rounded shadow hover:bg-gray-300 disabled:opacity-50"
+        >
+          Previous
+        </button>
+        <button
+          onClick={() => {
+            setCurrentPage((prev) => prev + 1);
+            setUserPaginated(true);
+          }}
+          disabled={(currentPage + 1) * moviesPerPage >= filteredMovies.length}
+          className="bg-gray-200 px-4 py-2 rounded shadow hover:bg-gray-300 disabled:opacity-50"
+        >
+          Next
+        </button>
       </div>
     </div>
   );
