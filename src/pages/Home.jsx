@@ -1,4 +1,5 @@
 import axios from "axios";
+import { AnimatePresence, motion } from "framer-motion";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import MovieCard from "../components/MovieCard";
@@ -77,7 +78,7 @@ const Home = () => {
   useEffect(() => {
     const interval = setInterval(() => {
       setCarouselIndex((prev) => (prev === movies.length - 1 ? 0 : prev + 1));
-    }, 5000);
+    }, 6000);
     return () => clearInterval(interval);
   }, []);
 
@@ -136,11 +137,18 @@ const Home = () => {
             onClick={() => handleMovieClick(movies[carouselIndex]._id)}
           >
             <div className="relative w-64 h-96 sm:w-[22rem] sm:h-[32rem] bg-gray-200 rounded-xl shadow-lg overflow-hidden mx-auto mb-4">
-              <img
-                src={movies[carouselIndex].poster}
-                alt={movies[carouselIndex].title}
-                className="absolute inset-0 w-full h-full object-cover"
-              />
+              <AnimatePresence mode="wait">
+                <motion.img
+                  key={movies[carouselIndex]._id} // Ny key for nytt bilde
+                  src={movies[carouselIndex].poster}
+                  alt={movies[carouselIndex].title}
+                  initial={{ opacity: 0 }} // Start usynlig
+                  animate={{ opacity: 1 }} // Fade in
+                  exit={{ opacity: 0 }} // Fade out for den som forsvinner
+                  transition={{ duration: 1, ease: "easeInOut" }} // Jevn overgang
+                  className="absolute inset-0 w-full h-full object-cover"
+                />
+              </AnimatePresence>
             </div>
 
             <p className="text-xl font-semibold text-gray-700">
