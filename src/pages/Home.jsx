@@ -74,6 +74,13 @@ const Home = () => {
     return () => window.removeEventListener("resize", updateMoviesPerPage);
   }, []);
 
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCarouselIndex((prev) => (prev === movies.length - 1 ? 0 : prev + 1));
+    }, 5000);
+    return () => clearInterval(interval);
+  }, []);
+
   const handlePrev = () => {
     setCarouselIndex((prev) => (prev === 0 ? movies.length - 1 : prev - 1));
   };
