@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
@@ -161,7 +160,7 @@ const Dashboard = () => {
           `https://critix-backend.onrender.com/api/movies/${selectedMovie._id}`,
           {
             title: updatedInfo.title,
-            description: updatedInfo.description,  // Include description in update request
+            description: updatedInfo.description,
             rating: updatedInfo.rating,
             genre: updatedInfo.genre,
             releaseYear: updatedInfo.releaseYear,
@@ -188,25 +187,18 @@ const Dashboard = () => {
 
   return (
       <div className="max-w-3xl mx-auto p-4">
-        <button>
-          <Link
-              to="/"
-              className="inline-block px-5 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition duration-300"
-          >
-            Home
-          </Link>
-        </button>
+
         <h1 className="text-2xl font-bold mb-4">Dashboard</h1>
 
         <button
             onClick={toggleModal}
-            className="mb-4 bg-blue-500 text-white p-2 rounded-md hover:bg-blue-600"
+            className="mb-4 bg-black text-white p-2 rounded-md hover:bg-gray-600 "
         >
           Add Movie
         </button>
         <button
             onClick={toggleShowMovies}
-            className="ml-5 bg-blue-500 text-white py-2 px-4 rounded mb-4 hover:bg-blue-700"
+            className="ml-5 bg-black text-white py-2 px-4 rounded mb-4 hover:bg-gray-600"
         >
           {showMovies ? 'Hide Movies' : 'Show Movies'}
         </button>
@@ -319,7 +311,7 @@ const Dashboard = () => {
 
               <button
                   type="submit"
-                  className="w-full bg-blue-500 text-white p-2 rounded-md hover:bg-blue-600"
+                  className="w-full bg-black text-white p-2 rounded-md hover:bg-gray-600"
               >
                 Create Movie
               </button>
@@ -464,7 +456,7 @@ const Dashboard = () => {
 
                   <button
                       type="submit"
-                      className="w-full bg-blue-500 text-white p-2 rounded-md hover:bg-blue-600"
+                      className="w-full bg-black text-white p-2 rounded-md hover:bg-gray-600"
                   >
                     Update Movie
                   </button>
@@ -506,16 +498,6 @@ const Dashboard = () => {
           </div>
         </div>
       </div>
-=======
-import React from "react";
-
-const Dashboard = () => {
-  return (
-    <div className="p-8">
-      <h1 className="text-3xl font-bold mb-4">Dashboard</h1>
-      <p>Welcome to the dashboard!</p>
-    </div>
->>>>>>> afade701bf37057e41f7b2ee9a542265ca95f139
   );
 };
 
