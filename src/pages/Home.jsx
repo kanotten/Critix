@@ -106,11 +106,13 @@ const Home = () => {
       </div>
     );
   const filteredMovies = movies.filter((movie) => {
-    const matchesTitle = movie.title
+    const matchesTitle = (movie.title ?? "")
       .toLowerCase()
       .includes(searchQuery.toLowerCase());
+
     const matchesGenre = genre ? movie.genre === genre : true;
     const matchesYear = releaseYear ? movie.releaseYear === releaseYear : true;
+
     return matchesTitle && matchesGenre && matchesYear;
   });
 
@@ -204,11 +206,14 @@ const Home = () => {
           aria-label="List of search results"
         >
           {moviesToDisplay.map((movie) => (
-            <MovieCard
+            <div
               key={movie._id}
-              movie={movie}
-              onClick={handleMovieClick}
-            />
+              role="listitem"
+              aria-label={`Movie: ${movie.title}`}
+              tabIndex="0"
+            >
+              <MovieCard movie={movie} onClick={handleMovieClick} />
+            </div>
           ))}
         </div>
       )}
