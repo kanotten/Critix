@@ -136,9 +136,11 @@ const Home = () => {
           <button
             onClick={handlePrev}
             className="text-3xl px-4 py-2 bg-white rounded-full shadow hover:bg-gray-200 transition"
+            aria-label="Show previous featured movie"
           >
             ←
           </button>
+
           <div
             className="text-center cursor-pointer transform transition duration-300 hover:scale-105 hover:shadow-2xl"
             onClick={() => handleMovieClick(movies[carouselIndex]._id)}
@@ -167,6 +169,7 @@ const Home = () => {
           <button
             onClick={handleNext}
             className="text-3xl px-4 py-2 bg-white rounded-full shadow hover:bg-gray-200 transition"
+            aria-label="Show next featured movie"
           >
             →
           </button>
@@ -214,6 +217,7 @@ const Home = () => {
           }}
           disabled={currentPage === 0}
           className="bg-gray-200 px-4 py-2 rounded shadow hover:bg-gray-300 disabled:opacity-50"
+          aria-label="Go to previous page"
         >
           Previous
         </button>
@@ -224,6 +228,7 @@ const Home = () => {
           }}
           disabled={(currentPage + 1) * moviesPerPage >= filteredMovies.length}
           className="bg-gray-200 px-4 py-2 rounded shadow hover:bg-gray-300 disabled:opacity-50"
+          aria-label="Go to next page"
         >
           Next
         </button>
