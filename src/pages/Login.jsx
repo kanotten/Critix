@@ -27,8 +27,8 @@ const Login = () => {
       const { token } = response.data;
       const decoded = jwtDecode(token); // Decode the JWT token
 
-      // Call the login function to update the global state
-      login(token, decoded.role, decoded.email);
+      console.log("Calling login function with token:", token);
+      login(token, decoded.role, decoded.email); // Call the Zustand login function
 
       // Redirect based on user role
       if (decoded.role === "admin") {

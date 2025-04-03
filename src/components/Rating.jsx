@@ -1,21 +1,42 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { FaStar } from "react-icons/fa";
+import useAuthStore from "../store/auth"; // Import Zustand store
 
 const Rating = ({ movieId }) => {
-  const [rating, setRating] = useState(0);           // User's own rating
-  const [average, setAverage] = useState(null);      // Avg from backend
-  const [rated, setRated] = useState(false);         // If already rated
+  const [rating, setRating] = useState(0); // User's own rating
+  const [average, setAverage] = useState(null); // Avg from backend
+  const [rated, setRated] = useState(false); // If already rated
 
-  // Get user token and decode email
-  const token = localStorage.getItem("token");
+  // Retrieve token and authentication state from the Zustand store
+  const token = useAuthStore((state) => state.token);
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
 
   // 🔹 Fetch average rating for this movie
   const fetchAverageRating = async () => {
     try {
-      const { data } = await axios.get(`https://critix-backend.onrender.com/api/ratings/${movieId}`);
-      const values = data.map((r) => r.value);
-      const avg = values.length > 0 ? (values.reduce((a, b) => a + b, 0) / values.length).toFixed(1) : null;
+      const { data } = await axios.get(
+        `https://critix-backend.onrender.com/api/ratings/${movieId}`,
+      );
+
+      // Handle different response structures
+      let ratings = [];
+      if (Array.isArray(data)) {
+        ratings = data; // Direct array
+      } else if (data && Array.isArray(data.ratings)) {
+        ratings = data.ratings; // Object containing an array
+      } else {
+        console.warn("Unexpected response structure:", data);
+        setAverage(null);
+        return;
+      }
+
+      // Calculate average
+      const values = ratings.map((r) => r.value);
+      const avg =
+        values.length > 0
+          ? (values.reduce((a, b) => a + b, 0) / values.length).toFixed(1)
+          : null;
       setAverage(avg);
     } catch (err) {
       console.error("Error fetching average rating:", err);
@@ -24,13 +45,13 @@ const Rating = ({ movieId }) => {
 
   // 🔹 Fetch user's own rating if logged in
   const fetchUserRating = async () => {
-    if (!token) return;
+    if (!isAuthenticated) return; // Skip if not authenticated
     try {
       const { data } = await axios.get(
         `https://critix-backend.onrender.com/api/ratings/user/${movieId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
       if (data.rating) {
         setRating(data.rating);
@@ -43,13 +64,13 @@ const Rating = ({ movieId }) => {
 
   // 🔹 Submit a new rating
   const handleRate = async (value) => {
-    if (!token) return alert("Login required to rate");
+    if (!isAuthenticated) return alert("Login required to rate");
 
     try {
       await axios.post(
         `https://critix-backend.onrender.com/api/ratings`,
         { movieId, value },
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
       setRating(value);
       setRated(true);

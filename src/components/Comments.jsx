@@ -1,16 +1,21 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import useAuthStore from "../store/auth"; // Import Zustand store
 
 const Comments = ({ movieId }) => {
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
   const [loading, setLoading] = useState(true);
 
+  // Retrieve token and authentication state from the Zustand store
+  const token = useAuthStore((state) => state.token);
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+
   useEffect(() => {
     const fetchComments = async () => {
       try {
         const res = await axios.get(
-          `https://critix-backend.onrender.com/api/comments/${movieId}`
+          `https://critix-backend.onrender.com/api/comments/${movieId}`,
         );
         setComments(res.data);
       } catch (err) {
@@ -26,8 +31,7 @@ const Comments = ({ movieId }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const token = localStorage.getItem("token");
-    if (!token) {
+    if (!isAuthenticated) {
       alert("You must be logged in to comment.");
       return;
     }
@@ -43,19 +47,19 @@ const Comments = ({ movieId }) => {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       setNewComment("");
 
       // Refresh comments
       const res = await axios.get(
-        `https://critix-backend.onrender.com/api/comments/${movieId}`
+        `https://critix-backend.onrender.com/api/comments/${movieId}`,
       );
       setComments(res.data);
     } catch (err) {
       console.error("Error posting comment:", err);
-      alert("Failed to post comment.");
+      alert("Failed to post comment. Please try again.");
     }
   };
 
@@ -97,7 +101,9 @@ const Comments = ({ movieId }) => {
           ))}
         </div>
       ) : (
-        <p className="text-gray-600">No comments yet. Be the first to comment!</p>
+        <p className="text-gray-600">
+          No comments yet. Be the first to comment!
+        </p>
       )}
     </div>
   );
