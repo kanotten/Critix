@@ -1,6 +1,6 @@
 ---
 
-[image](https://github.com/user-attachments/assets/363b501e-b212-4924-bdb3-345ddb84b43d)
+![image](https://github.com/user-attachments/assets/363b501e-b212-4924-bdb3-345ddb84b43d)
 
 ---
 
@@ -19,6 +19,7 @@ CritiX is a movie review platform designed to provide users with a seamless expe
 - [Tech Stack](#tech-stack)
 - [Installation](#installation)
 - [Usage](#usage)
+- [Default Credentials](#default-credentials)
 - [Contributors](#contributors)
 - [License](#license)
 - [Contact](#contact)
@@ -60,7 +61,6 @@ The separation of roles ensures that regular users can only interact with their 
 ![Movie Details](./screenshots/movie-details.png)  
 *Detailed view of a movie, including reviews and ratings.*
 
-*(Add more screenshots here as needed.)*
 
 ---
 
@@ -154,6 +154,15 @@ To set up CritiX locally, follow these steps:
 
 ---
 
+## Default Credentials
+
+To access the **admin dashboard**, use the following credentials:
+
+- **Email**: `admin@example.com`  
+- **Password**: `admin123`
+
+---
+
 ## Contributors
 
 This project was developed by the following team members:
@@ -182,3 +191,5 @@ For questions, feedback, or collaboration opportunities, feel free to reach out 
 - **Email**: kenfir01273@stud.noroff.no
 
 ---
+
+
