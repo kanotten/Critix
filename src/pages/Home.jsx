@@ -190,7 +190,7 @@ const Home = () => {
 
       {/* Grid Section */}
       <h1 className="text-4xl font-bold text-center mb-10 text-gray-800">
-        🎬 Movie List
+        🎬 Explore Our Movies
       </h1>
       {filteredMovies.length === 0 ? (
         <div className="text-center mt-10 text-gray-600 text-lg">
