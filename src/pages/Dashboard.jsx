@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import useAuthStore from '../store/auth.js';
+import sanityClient from '@sanity/client';
 
 const Dashboard = () => {
   const [formData, setFormData] = useState({
@@ -19,7 +21,7 @@ const Dashboard = () => {
     rating: '',
     genre: '',
     releaseYear: '',
-    poster: ''
+    poster: '',
   });
   const [showMovies, setShowMovies] = useState(false);
   const navigate = useNavigate();
@@ -29,15 +31,25 @@ const Dashboard = () => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [movieIdToDelete, setMovieIdToDelete] = useState('');
 
+  const { isAuthenticated, token, userRole, login, logout } = useAuthStore();
+
+  // Sanity client setup
+  const sanity = sanityClient({
+    projectId: 'your-project-id',  // Replace with your project ID
+    dataset: 'production',         // Replace with your dataset
+    apiVersion: '2023-03-25',      // Use the correct API version
+    token: 'your-sanity-api-token', // Replace with your sanity API token
+    useCdn: false,
+  });
+
   useEffect(() => {
     const fetchMovies = async () => {
-      try {
-        const token = localStorage.getItem('jwtToken');
-        if (!token) {
-          setError('No authentication token found. Please log in.');
-          return;
-        }
+      if (!token) {
+        setError('No authentication token found. Please log in.');
+        return;
+      }
 
+      try {
         const response = await axios.get('https://critix-backend.onrender.com/api/movies', {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -50,7 +62,7 @@ const Dashboard = () => {
     };
 
     fetchMovies();
-  }, []);
+  }, [token]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -60,11 +72,47 @@ const Dashboard = () => {
     }));
   };
 
+  // Handle image upload to Sanity
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+
+    if (!file) {
+      setError('No file selected.');
+      return;
+    }
+
+    const reader = new FileReader();
+
+    reader.onloadend = async () => {
+      const image = reader.result;
+
+      try {
+        const uploadedAsset = await sanity.assets.upload('image', file, {
+          filename: file.name,
+        });
+        setFormData((prevState) => ({
+          ...prevState,
+          poster: uploadedAsset.url, // Save the URL returned by Sanity
+        }));
+        setSuccessMessage('Image uploaded successfully!');
+      } catch (err) {
+        setError('Error uploading image. Please try again.');
+      }
+    };
+
+    reader.readAsDataURL(file);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const token = localStorage.getItem('jwtToken');
+
     if (!token) {
       setError('No authentication token found. Please log in.');
+      return;
+    }
+
+    if (userRole !== 'admin') {
+      setError('Only admins can create movies.');
       return;
     }
 
@@ -98,9 +146,13 @@ const Dashboard = () => {
   };
 
   const handleDelete = async () => {
-    const token = localStorage.getItem('jwtToken');
     if (!token || !selectedMovie?._id) {
       setError('No authentication token or movie ID found. Please log in or select a movie to delete.');
+      return;
+    }
+
+    if (userRole !== 'admin') {
+      setError('Only admins can delete movies.');
       return;
     }
 
@@ -123,14 +175,6 @@ const Dashboard = () => {
     }
   };
 
-  const toggleModal = () => {
-    setIsModalOpen(!isModalOpen);
-  };
-
-  const toggleDeleteModal = () => {
-    setIsDeleteModalOpen(!isDeleteModalOpen);
-  };
-
   const handleEditClick = (movie) => {
     setSelectedMovie(movie);
     setUpdatedInfo({
@@ -139,7 +183,7 @@ const Dashboard = () => {
       rating: movie.rating || '',
       genre: movie.genre || '',
       releaseYear: movie.releaseYear || '',
-      poster: movie.poster || ''
+      poster: movie.poster || '',
     });
   };
 
@@ -149,9 +193,13 @@ const Dashboard = () => {
       return;
     }
 
-    const token = localStorage.getItem('jwtToken');
     if (!token) {
       console.error('No JWT token found.');
+      return;
+    }
+
+    if (userRole !== 'admin') {
+      setError('Only admins can update movies.');
       return;
     }
 
@@ -181,38 +229,33 @@ const Dashboard = () => {
     }
   };
 
+  const toggleModal = () => {
+    setIsModalOpen(!isModalOpen);
+  };
+
+  const toggleDeleteModal = () => {
+    setIsDeleteModalOpen(!isDeleteModalOpen);
+  };
+
   const toggleShowMovies = () => {
-    setShowMovies(prevState => !prevState);
+    setShowMovies((prevState) => !prevState);
   };
 
   return (
       <div className="max-w-3xl mx-auto p-4">
-
         <h1 className="text-2xl font-bold mb-4">Dashboard</h1>
 
-        <button
-            onClick={toggleModal}
-            className="mb-4 bg-black text-white p-2 rounded-md hover:bg-gray-600 "
-        >
+        <button onClick={toggleModal} className="mb-4 bg-black text-white p-2 rounded-md hover:bg-gray-600">
           Add Movie
         </button>
-        <button
-            onClick={toggleShowMovies}
-            className="ml-5 bg-black text-white py-2 px-4 rounded mb-4 hover:bg-gray-600"
-        >
+        <button onClick={toggleShowMovies} className="ml-5 bg-black text-white py-2 px-4 rounded mb-4 hover:bg-gray-600">
           {showMovies ? 'Hide Movies' : 'Show Movies'}
         </button>
 
-        {successMessage && (
-            <div className="text-green-500 mb-4">{successMessage}</div>
-        )}
+        {successMessage && <div className="text-green-500 mb-4">{successMessage}</div>}
         {error && <div className="text-red-500 mb-4">{error}</div>}
 
-        <div
-            className={`transition-all duration-500 ease-in-out ${
-                isModalOpen ? 'max-h-screen' : 'max-h-0'
-            } overflow-hidden`}
-        >
+        <div className={`transition-all duration-500 ease-in-out ${isModalOpen ? 'max-h-screen' : 'max-h-0'} overflow-hidden`}>
           <div className="bg-white p-6 rounded-lg shadow-lg w-full">
             <h2 className="text-2xl font-bold mb-4">Create a Movie</h2>
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -231,7 +274,6 @@ const Dashboard = () => {
                       required
                   />
                 </div>
-
                 <div>
                   <label htmlFor="rating" className="block text-sm font-medium text-gray-700">
                     Rating 1-5
@@ -247,7 +289,6 @@ const Dashboard = () => {
                   />
                 </div>
               </div>
-
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div>
                   <label htmlFor="genre" className="block text-sm font-medium text-gray-700">
@@ -263,7 +304,6 @@ const Dashboard = () => {
                       required
                   />
                 </div>
-
                 <div>
                   <label htmlFor="releaseYear" className="block text-sm font-medium text-gray-700">
                     Release Year
@@ -279,7 +319,6 @@ const Dashboard = () => {
                   />
                 </div>
               </div>
-
               <div>
                 <label htmlFor="description" className="block text-sm font-medium text-gray-700">
                   Description
@@ -296,43 +335,32 @@ const Dashboard = () => {
 
               <div>
                 <label htmlFor="poster" className="block text-sm font-medium text-gray-700">
-                  Poster URL
+                  Upload Poster Image
                 </label>
                 <input
-                    type="url"
+                    type="file"
                     id="poster"
                     name="poster"
-                    value={formData.poster}
-                    onChange={handleInputChange}
+                    onChange={handleImageUpload}
                     className="mt-1 p-2 w-full border border-gray-300 rounded-md"
                     required
                 />
               </div>
 
-              <button
-                  type="submit"
-                  className="w-full bg-blue-500 text-white p-2 rounded-md hover:bg-gray-600"
-              >
+              <button type="submit" className="w-full bg-blue-500 text-white p-2 rounded-md hover:bg-gray-600">
                 Create Movie
               </button>
             </form>
-
-            <button
-                onClick={toggleModal}
-                className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
-            >
+            <button onClick={toggleModal} className="absolute top-2 right-2 text-gray-500 hover:text-gray-700">
               &times;
             </button>
-
           </div>
         </div>
 
         <div className="container mx-auto p-4">
-
-
           {showMovies && (
               <div className="grid grid-cols-1 gap-4">
-                {movies.map(movie => (
+                {movies.map((movie) => (
                     <div key={movie._id} className="p-4 border rounded shadow-lg">
                       <h2
                           className="text-xl font-semibold cursor-pointer"
@@ -359,14 +387,11 @@ const Dashboard = () => {
                           id="title"
                           name="title"
                           value={updatedInfo.title}
-                          onChange={(e) =>
-                              setUpdatedInfo({ ...updatedInfo, title: e.target.value })
-                          }
+                          onChange={(e) => setUpdatedInfo({ ...updatedInfo, title: e.target.value })}
                           className="mt-1 p-2 w-full border border-gray-300 rounded-md"
                           required
                       />
                     </div>
-
                     <div>
                       <label htmlFor="rating" className="block text-sm font-medium text-gray-700">
                         Rating 1-5
@@ -376,9 +401,7 @@ const Dashboard = () => {
                           id="rating"
                           name="rating"
                           value={updatedInfo.rating}
-                          onChange={(e) =>
-                              setUpdatedInfo({ ...updatedInfo, rating: e.target.value })
-                          }
+                          onChange={(e) => setUpdatedInfo({ ...updatedInfo, rating: e.target.value })}
                           className="mt-1 p-2 w-full border border-gray-300 rounded-md"
                           required
                       />
@@ -395,9 +418,7 @@ const Dashboard = () => {
                           id="genre"
                           name="genre"
                           value={updatedInfo.genre}
-                          onChange={(e) =>
-                              setUpdatedInfo({ ...updatedInfo, genre: e.target.value })
-                          }
+                          onChange={(e) => setUpdatedInfo({ ...updatedInfo, genre: e.target.value })}
                           className="mt-1 p-2 w-full border border-gray-300 rounded-md"
                           required
                       />
@@ -412,9 +433,7 @@ const Dashboard = () => {
                           id="releaseYear"
                           name="releaseYear"
                           value={updatedInfo.releaseYear}
-                          onChange={(e) =>
-                              setUpdatedInfo({ ...updatedInfo, releaseYear: e.target.value })
-                          }
+                          onChange={(e) => setUpdatedInfo({ ...updatedInfo, releaseYear: e.target.value })}
                           className="mt-1 p-2 w-full border border-gray-300 rounded-md"
                           required
                       />
@@ -429,9 +448,7 @@ const Dashboard = () => {
                         id="description"
                         name="description"
                         value={updatedInfo.description}
-                        onChange={(e) =>
-                            setUpdatedInfo({ ...updatedInfo, description: e.target.value })
-                        }
+                        onChange={(e) => setUpdatedInfo({ ...updatedInfo, description: e.target.value })}
                         className="mt-1 p-2 w-full border border-gray-300 rounded-md"
                         required
                     />
@@ -446,18 +463,13 @@ const Dashboard = () => {
                         id="poster"
                         name="poster"
                         value={updatedInfo.poster}
-                        onChange={(e) =>
-                            setUpdatedInfo({ ...updatedInfo, poster: e.target.value })
-                        }
+                        onChange={(e) => setUpdatedInfo({ ...updatedInfo, poster: e.target.value })}
                         className="mt-1 p-2 w-full border border-gray-300 rounded-md"
                         required
                     />
                   </div>
 
-                  <button
-                      type="submit"
-                      className="w-full bg-blue-500 text-white p-2 rounded-md hover:bg-gray-600"
-                  >
+                  <button type="submit" className="w-full bg-blue-500 text-white p-2 rounded-md hover:bg-gray-600">
                     Update Movie
                   </button>
                 </form>
@@ -472,11 +484,7 @@ const Dashboard = () => {
           )}
         </div>
 
-        <div
-            className={`transition-all duration-500 ease-in-out ${
-                isDeleteModalOpen ? 'max-h-screen' : 'max-h-0'
-            } overflow-hidden`}
-        >
+        <div className={`transition-all duration-500 ease-in-out ${isDeleteModalOpen ? 'max-h-screen' : 'max-h-0'} overflow-hidden`}>
           <div className="bg-white p-6 rounded-lg shadow-lg w-full">
             <h2 className="text-2xl font-bold mb-4">Confirm Deletion</h2>
             <p>Are you sure you want to delete this movie?</p>
