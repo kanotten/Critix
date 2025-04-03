@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import useAuthStore from '../store/auth.js';
+import sanityClient from '@sanity/client';
 
 const Dashboard = () => {
   const [formData, setFormData] = useState({
@@ -32,6 +33,15 @@ const Dashboard = () => {
 
   const { isAuthenticated, token, userRole, login, logout } = useAuthStore();
 
+  // Sanity client setup
+  const sanity = sanityClient({
+    projectId: 'your-project-id',  // Replace with your project ID
+    dataset: 'production',         // Replace with your dataset
+    apiVersion: '2023-03-25',      // Use the correct API version
+    token: 'your-sanity-api-token', // Replace with your sanity API token
+    useCdn: false,
+  });
+
   useEffect(() => {
     const fetchMovies = async () => {
       if (!token) {
@@ -60,6 +70,37 @@ const Dashboard = () => {
       ...prevData,
       [name]: value,
     }));
+  };
+
+  // Handle image upload to Sanity
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+
+    if (!file) {
+      setError('No file selected.');
+      return;
+    }
+
+    const reader = new FileReader();
+
+    reader.onloadend = async () => {
+      const image = reader.result;
+
+      try {
+        const uploadedAsset = await sanity.assets.upload('image', file, {
+          filename: file.name,
+        });
+        setFormData((prevState) => ({
+          ...prevState,
+          poster: uploadedAsset.url, // Save the URL returned by Sanity
+        }));
+        setSuccessMessage('Image uploaded successfully!');
+      } catch (err) {
+        setError('Error uploading image. Please try again.');
+      }
+    };
+
+    reader.readAsDataURL(file);
   };
 
   const handleSubmit = async (e) => {
@@ -291,20 +332,21 @@ const Dashboard = () => {
                     required
                 />
               </div>
+
               <div>
                 <label htmlFor="poster" className="block text-sm font-medium text-gray-700">
-                  Poster URL
+                  Upload Poster Image
                 </label>
                 <input
-                    type="url"
+                    type="file"
                     id="poster"
                     name="poster"
-                    value={formData.poster}
-                    onChange={handleInputChange}
+                    onChange={handleImageUpload}
                     className="mt-1 p-2 w-full border border-gray-300 rounded-md"
                     required
                 />
               </div>
+
               <button type="submit" className="w-full bg-blue-500 text-white p-2 rounded-md hover:bg-gray-600">
                 Create Movie
               </button>
@@ -345,9 +387,7 @@ const Dashboard = () => {
                           id="title"
                           name="title"
                           value={updatedInfo.title}
-                          onChange={(e) =>
-                              setUpdatedInfo({ ...updatedInfo, title: e.target.value })
-                          }
+                          onChange={(e) => setUpdatedInfo({ ...updatedInfo, title: e.target.value })}
                           className="mt-1 p-2 w-full border border-gray-300 rounded-md"
                           required
                       />
@@ -361,9 +401,7 @@ const Dashboard = () => {
                           id="rating"
                           name="rating"
                           value={updatedInfo.rating}
-                          onChange={(e) =>
-                              setUpdatedInfo({ ...updatedInfo, rating: e.target.value })
-                          }
+                          onChange={(e) => setUpdatedInfo({ ...updatedInfo, rating: e.target.value })}
                           className="mt-1 p-2 w-full border border-gray-300 rounded-md"
                           required
                       />
@@ -380,9 +418,7 @@ const Dashboard = () => {
                           id="genre"
                           name="genre"
                           value={updatedInfo.genre}
-                          onChange={(e) =>
-                              setUpdatedInfo({ ...updatedInfo, genre: e.target.value })
-                          }
+                          onChange={(e) => setUpdatedInfo({ ...updatedInfo, genre: e.target.value })}
                           className="mt-1 p-2 w-full border border-gray-300 rounded-md"
                           required
                       />
@@ -397,9 +433,7 @@ const Dashboard = () => {
                           id="releaseYear"
                           name="releaseYear"
                           value={updatedInfo.releaseYear}
-                          onChange={(e) =>
-                              setUpdatedInfo({ ...updatedInfo, releaseYear: e.target.value })
-                          }
+                          onChange={(e) => setUpdatedInfo({ ...updatedInfo, releaseYear: e.target.value })}
                           className="mt-1 p-2 w-full border border-gray-300 rounded-md"
                           required
                       />
@@ -414,9 +448,7 @@ const Dashboard = () => {
                         id="description"
                         name="description"
                         value={updatedInfo.description}
-                        onChange={(e) =>
-                            setUpdatedInfo({ ...updatedInfo, description: e.target.value })
-                        }
+                        onChange={(e) => setUpdatedInfo({ ...updatedInfo, description: e.target.value })}
                         className="mt-1 p-2 w-full border border-gray-300 rounded-md"
                         required
                     />
@@ -431,18 +463,13 @@ const Dashboard = () => {
                         id="poster"
                         name="poster"
                         value={updatedInfo.poster}
-                        onChange={(e) =>
-                            setUpdatedInfo({ ...updatedInfo, poster: e.target.value })
-                        }
+                        onChange={(e) => setUpdatedInfo({ ...updatedInfo, poster: e.target.value })}
                         className="mt-1 p-2 w-full border border-gray-300 rounded-md"
                         required
                     />
                   </div>
 
-                  <button
-                      type="submit"
-                      className="w-full bg-blue-500 text-white p-2 rounded-md hover:bg-gray-600"
-                  >
+                  <button type="submit" className="w-full bg-blue-500 text-white p-2 rounded-md hover:bg-gray-600">
                     Update Movie
                   </button>
                 </form>
