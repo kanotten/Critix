@@ -76,11 +76,14 @@ const Home = () => {
   }, []);
 
   useEffect(() => {
+    if (movies.length === 0) return;
+
     const interval = setInterval(() => {
       setCarouselIndex((prev) => (prev === movies.length - 1 ? 0 : prev + 1));
     }, 6000);
+
     return () => clearInterval(interval);
-  }, []);
+  }, [movies]);
 
   const handlePrev = () => {
     setCarouselIndex((prev) => (prev === 0 ? movies.length - 1 : prev - 1));
@@ -138,16 +141,18 @@ const Home = () => {
           >
             <div className="relative w-64 h-96 sm:w-[22rem] sm:h-[32rem] bg-gray-200 rounded-xl shadow-lg overflow-hidden mx-auto mb-4">
               <AnimatePresence mode="wait">
-                <motion.img
-                  key={movies[carouselIndex]._id} // Ny key for nytt bilde
-                  src={movies[carouselIndex].poster}
-                  alt={movies[carouselIndex].title}
-                  initial={{ opacity: 0 }} // Start usynlig
-                  animate={{ opacity: 1 }} // Fade in
-                  exit={{ opacity: 0 }} // Fade out for den som forsvinner
-                  transition={{ duration: 1, ease: "easeInOut" }} // Jevn overgang
-                  className="absolute inset-0 w-full h-full object-cover"
-                />
+                {movies[carouselIndex]?.poster && (
+                  <motion.img
+                    key={movies[carouselIndex]._id}
+                    src={movies[carouselIndex].poster}
+                    alt={movies[carouselIndex].title || "Unknown Title"}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 1, ease: "easeInOut" }}
+                    className="absolute inset-0 w-full h-full object-cover"
+                  />
+                )}
               </AnimatePresence>
             </div>
 
