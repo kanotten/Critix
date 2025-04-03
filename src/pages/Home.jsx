@@ -36,8 +36,12 @@ const Home = () => {
   };
 
   const handleMovieClick = (id) => {
-    navigate(`/movie/${id}`);
+    setLoading(true);
+    setTimeout(() => {
+      navigate(`/movie/${id}`);
+    }, 100);
   };
+
   useEffect(() => {
     if (userPaginated) {
       window.scrollTo({ top: 0, behavior: "smooth" });
