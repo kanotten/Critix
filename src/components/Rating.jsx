@@ -1,30 +1,29 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { FaStar } from "react-icons/fa";
-import useAuthStore from "../store/auth"; // Import Zustand store
+import useAuthStore from "../store/auth"; //
 
 const Rating = ({ movieId }) => {
-  const [rating, setRating] = useState(0); // User's own rating
-  const [average, setAverage] = useState(null); // Avg from backend
-  const [rated, setRated] = useState(false); // If already rated
+  const [rating, setRating] = useState(0);
+  const [average, setAverage] = useState(null);
+  const [rated, setRated] = useState(false);
+  const [error, setError] = useState("");
 
-  // Retrieve token and authentication state from the Zustand store
   const token = useAuthStore((state) => state.token);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
 
-  // 🔹 Fetch average rating for this movie
   const fetchAverageRating = async () => {
     try {
+      setError("");
       const { data } = await axios.get(
         `https://critix-backend.onrender.com/api/ratings/${movieId}`,
       );
 
-      // Handle different response structures
       let ratings = [];
       if (Array.isArray(data)) {
-        ratings = data; // Direct array
+        ratings = data;
       } else if (data && Array.isArray(data.ratings)) {
-        ratings = data.ratings; // Object containing an array
+        ratings = data.ratings;
       } else {
         console.warn("Unexpected response structure:", data);
         setAverage(null);
@@ -38,15 +37,16 @@ const Rating = ({ movieId }) => {
           ? (values.reduce((a, b) => a + b, 0) / values.length).toFixed(1)
           : null;
       setAverage(avg);
-    } catch (err) {
-      console.error("Error fetching average rating:", err);
+    } catch {
+      setError("Failed to load average rating. Please try again later.");
     }
   };
 
-  // 🔹 Fetch user's own rating if logged in
+  // Fetch user's own rating if logged in
   const fetchUserRating = async () => {
-    if (!isAuthenticated) return; // Skip if not authenticated
+    if (!isAuthenticated) return; // Skip
     try {
+      setError(""); // Clear
       const { data } = await axios.get(
         `https://critix-backend.onrender.com/api/ratings/user/${movieId}`,
         {
@@ -57,16 +57,20 @@ const Rating = ({ movieId }) => {
         setRating(data.rating);
         setRated(true);
       }
-    } catch (err) {
-      console.error("Error fetching user rating:", err);
+    } catch {
+      setError("Failed to load your rating. Please try again later.");
     }
   };
 
-  // 🔹 Submit a new rating
+  // new rating
   const handleRate = async (value) => {
-    if (!isAuthenticated) return alert("Login required to rate");
+    if (!isAuthenticated) {
+      alert("Login required to rate");
+      return;
+    }
 
     try {
+      setError("");
       await axios.post(
         `https://critix-backend.onrender.com/api/ratings`,
         { movieId, value },
@@ -75,9 +79,28 @@ const Rating = ({ movieId }) => {
       setRating(value);
       setRated(true);
       fetchAverageRating(); // Refresh avg
-    } catch (err) {
-      console.error("Rating failed:", err);
+    } catch {
+      setError("Failed to submit rating. Please try again.");
     }
+  };
+
+  const renderError = () => {
+    if (error) {
+      return <p className="text-red-500 text-sm mb-2">{error}</p>;
+    }
+    return null;
+  };
+
+  // Render average rating
+  const renderAverageRating = () => {
+    if (average) {
+      return (
+        <p className="text-gray-600 text-sm mt-1">
+          ⭐ Average Rating: <strong>{average}</strong>/5
+        </p>
+      );
+    }
+    return null;
   };
 
   useEffect(() => {
@@ -89,6 +112,10 @@ const Rating = ({ movieId }) => {
     <div className="mt-10">
       <h2 className="text-xl font-semibold mb-2">⭐ Rate this movie</h2>
 
+      {/* Error Message */}
+      {renderError()}
+
+      {/* Star Rating */}
       <div className="flex items-center space-x-1">
         {[1, 2, 3, 4, 5].map((star) => (
           <FaStar
@@ -101,12 +128,9 @@ const Rating = ({ movieId }) => {
         ))}
       </div>
 
+      {/* Feedback Messages */}
       {rated && <p className="text-green-600 mt-2">Thanks for rating!</p>}
-      {average && (
-        <p className="text-gray-600 text-sm mt-1">
-          ⭐ Average Rating: <strong>{average}</strong>/5
-        </p>
-      )}
+      {renderAverageRating()}
     </div>
   );
 };
