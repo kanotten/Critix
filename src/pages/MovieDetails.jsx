@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
-import { urlFor } from "../api/sanity";
 import Comments from "../components/Comments";
 import Rating from "../components/Rating";
 
@@ -60,7 +59,7 @@ const MovieDetails = () => {
         {/* Poster */}
         {movie?.poster?.asset && (
           <img
-            src={urlFor(movie.poster).url()}
+            src={movie.poster}
             alt={movie?.title || "Movie Poster"}
             className="w-full rounded-lg shadow-lg"
           />

@@ -59,24 +59,19 @@ const Dashboard = () => {
 
   const handleImageUpload = async (e) => {
     const file = e.target.files[0];
-
     if (!file) return setError('No file selected.');
-
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
-    if (!allowedTypes.includes(file.type)) return setError('Invalid file type.');
+    if (!['image/jpeg', 'image/png', 'image/gif'].includes(file.type)) return setError('Invalid file type.');
 
     try {
-      const uploadedAsset = await client.assets.upload('image', file, {
-        filename: file.name,
-      });
-      setFormData((prevState) => ({
-        ...prevState,
+      const uploadedAsset = await client.assets.upload('image', file, { filename: file.name });
+      setFormData((prev) => ({
+        ...prev,
         poster: {
           _type: "image",
           asset: {
             _ref: uploadedAsset._id,
             _type: "reference",
-          }
+          },
         },
       }));
       setSuccessMessage('Image uploaded successfully!');
@@ -88,21 +83,22 @@ const Dashboard = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!token || userRole !== 'admin') return setError('Admin access required.');
-
     if (!formData.poster) return setError('Please upload a poster image before submitting.');
 
+    console.log('Form Data:', formData);
+
     try {
-      await axios.post('https://critix-backend.onrender.com/api/movies', formData, {
+      const response = await axios.post('https://critix-backend.onrender.com/api/movies', formData, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setFormData({ title: '', description: '', genre: '', rating: '', releaseYear: '', poster: '' });
       setSuccessMessage('Movie created successfully!');
       setError('');
-    } catch {
+    } catch (err) {
+      console.error('Error creating movie:', err); // Debugging
       setError('Error creating movie. Please try again.');
     }
   };
-
   const handleEditClick = (movie) => {
     setSelectedMovie(movie);
     setUpdatedInfo({
