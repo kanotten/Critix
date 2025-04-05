@@ -18,12 +18,14 @@ const SearchBar = ({
         onChange={(e) => setSearchQuery(e.target.value)}
         placeholder="🔍 Search movies by title..."
         className="w-full md:w-auto px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring focus:border-blue-300"
+        aria-label="Search movies by title"
       />
       {/* 🔽 Filtrering etter genre */}
       <select
         value={genre}
         onChange={(e) => setGenre(e.target.value)}
         className="w-full md:w-auto px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring focus:border-blue-300"
+        aria-label="Filter movies by genre"
       >
         <option value="">All Genres</option>
         {(genres || []).map((g) => (
@@ -36,6 +38,7 @@ const SearchBar = ({
         value={releaseYear}
         onChange={(e) => setReleaseYear(e.target.value)}
         className="w-full md:w-auto px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring focus:border-blue-300"
+        aria-label="Filter movies by release year"
       >
         <option value="">All Years</option>
 

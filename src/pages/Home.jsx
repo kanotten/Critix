@@ -1,4 +1,5 @@
 import axios from "axios";
+import { AnimatePresence, motion } from "framer-motion";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import MovieCard from "../components/MovieCard";
@@ -35,8 +36,12 @@ const Home = () => {
   };
 
   const handleMovieClick = (id) => {
-    navigate(`/movie/${id}`);
+    setLoading(true);
+    setTimeout(() => {
+      navigate(`/movie/${id}`);
+    }, 100);
   };
+
   useEffect(() => {
     if (userPaginated) {
       window.scrollTo({ top: 0, behavior: "smooth" });
@@ -74,6 +79,16 @@ const Home = () => {
     return () => window.removeEventListener("resize", updateMoviesPerPage);
   }, []);
 
+  useEffect(() => {
+    if (movies.length === 0) return;
+
+    const interval = setInterval(() => {
+      setCarouselIndex((prev) => (prev === movies.length - 1 ? 0 : prev + 1));
+    }, 6000);
+
+    return () => clearInterval(interval);
+  }, [movies]);
+
   const handlePrev = () => {
     setCarouselIndex((prev) => (prev === 0 ? movies.length - 1 : prev - 1));
   };
@@ -91,11 +106,13 @@ const Home = () => {
       </div>
     );
   const filteredMovies = movies.filter((movie) => {
-    const matchesTitle = movie.title
+    const matchesTitle = (movie.title ?? "")
       .toLowerCase()
       .includes(searchQuery.toLowerCase());
+
     const matchesGenre = genre ? movie.genre === genre : true;
     const matchesYear = releaseYear ? movie.releaseYear === releaseYear : true;
+
     return matchesTitle && matchesGenre && matchesYear;
   });
 
@@ -117,22 +134,36 @@ const Home = () => {
         🔥 Featured Movie
       </h2>
       {movies.length > 0 && (
-        <div className="flex justify-center items-center gap-6 mb-14">
+        <div className="flex justify-center items-center gap-2 sm:gap-6 mb-14 px-4">
           <button
             onClick={handlePrev}
             className="text-3xl px-4 py-2 bg-white rounded-full shadow hover:bg-gray-200 transition"
+            aria-label="Show previous featured movie"
           >
             ←
           </button>
+
           <div
             className="text-center cursor-pointer transform transition duration-300 hover:scale-105 hover:shadow-2xl"
             onClick={() => handleMovieClick(movies[carouselIndex]._id)}
           >
-            <img
-              src={movies[carouselIndex].poster}
-              alt={movies[carouselIndex].title}
-              className="h-96 w-64 object-cover rounded-xl shadow-lg mx-auto mb-4"
-            />
+            <div className="relative w-64 h-96 sm:w-[22rem] sm:h-[32rem] bg-gray-200 rounded-xl shadow-lg overflow-hidden mx-auto mb-4">
+              <AnimatePresence mode="wait">
+                {movies[carouselIndex]?.poster && (
+                  <motion.img
+                    key={movies[carouselIndex]._id}
+                    src={movies[carouselIndex].poster}
+                    alt={movies[carouselIndex].title || "Unknown Title"}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 1, ease: "easeInOut" }}
+                    className="absolute inset-0 w-full h-full object-cover"
+                  />
+                )}
+              </AnimatePresence>
+            </div>
+
             <p className="text-xl font-semibold text-gray-700">
               {movies[carouselIndex].title}
             </p>
@@ -140,6 +171,7 @@ const Home = () => {
           <button
             onClick={handleNext}
             className="text-3xl px-4 py-2 bg-white rounded-full shadow hover:bg-gray-200 transition"
+            aria-label="Show next featured movie"
           >
             →
           </button>
@@ -158,20 +190,30 @@ const Home = () => {
 
       {/* Grid Section */}
       <h1 className="text-4xl font-bold text-center mb-10 text-gray-800">
-        🎬 Movie List
+        🎬 Explore Our Movies
       </h1>
       {filteredMovies.length === 0 ? (
         <div className="text-center mt-10 text-gray-600 text-lg">
-          😅 Oops! No movies found. Try adjusting your search or filters.
+          😞 Oops! No movies found. Try adjusting your search or filters
+          <span role="img" aria-label="no movies found" className="text-2xl">
+            🔍
+          </span>
         </div>
       ) : (
-        <div className="grid gap-8 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+        <div
+          className="grid gap-8 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
+          role="list"
+          aria-label="List of search results"
+        >
           {moviesToDisplay.map((movie) => (
-            <MovieCard
+            <div
               key={movie._id}
-              movie={movie}
-              onClick={handleMovieClick}
-            />
+              role="listitem"
+              aria-label={`Movie: ${movie.title}`}
+              tabIndex="0"
+            >
+              <MovieCard movie={movie} onClick={handleMovieClick} />
+            </div>
           ))}
         </div>
       )}
@@ -184,6 +226,7 @@ const Home = () => {
           }}
           disabled={currentPage === 0}
           className="bg-gray-200 px-4 py-2 rounded shadow hover:bg-gray-300 disabled:opacity-50"
+          aria-label="Go to previous page"
         >
           Previous
         </button>
@@ -194,6 +237,7 @@ const Home = () => {
           }}
           disabled={(currentPage + 1) * moviesPerPage >= filteredMovies.length}
           className="bg-gray-200 px-4 py-2 rounded shadow hover:bg-gray-300 disabled:opacity-50"
+          aria-label="Go to next page"
         >
           Next
         </button>
