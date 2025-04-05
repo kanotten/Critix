@@ -85,8 +85,6 @@ const Dashboard = () => {
     if (!token || userRole !== 'admin') return setError('Admin access required.');
     if (!formData.poster) return setError('Please upload a poster image before submitting.');
 
-    console.log('Form Data:', formData);
-
     try {
       const response = await axios.post('https://critix-backend.onrender.com/api/movies', formData, {
         headers: { Authorization: `Bearer ${token}` },
@@ -95,7 +93,6 @@ const Dashboard = () => {
       setSuccessMessage('Movie created successfully!');
       setError('');
     } catch (err) {
-      console.error('Error creating movie:', err); // Debugging
       setError('Error creating movie. Please try again.');
     }
   };
@@ -128,7 +125,7 @@ const Dashboard = () => {
   };
 
   const handleUpdateMovie = async (e) => {
-    e.preventDefault(); // Prevent form submission default behavior
+    e.preventDefault();
 
     if (!selectedMovie || !selectedMovie._id) return setError('Invalid movie selected.');
 
@@ -169,7 +166,6 @@ const Dashboard = () => {
       setSelectedMovie(null);
       setNewPosterFile(null);
     } catch (err) {
-      console.error('Error updating movie:', err);
       setError('Error updating movie. Please try again.');
     }
   };
