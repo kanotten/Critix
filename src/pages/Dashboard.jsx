@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import useAuthStore from '../store/auth.js';
-import sanityClient from '@sanity/client';
+import client from "../api/sanity.js";
 
 const Dashboard = () => {
   const [formData, setFormData] = useState({
@@ -11,8 +11,9 @@ const Dashboard = () => {
     genre: '',
     rating: '',
     releaseYear: '',
-    poster: '',
+    poster: ''
   });
+
   const [movies, setMovies] = useState([]);
   const [selectedMovie, setSelectedMovie] = useState(null);
   const [updatedInfo, setUpdatedInfo] = useState({
@@ -21,42 +22,29 @@ const Dashboard = () => {
     rating: '',
     genre: '',
     releaseYear: '',
-    poster: '',
+    poster: ''
   });
-  const [showMovies, setShowMovies] = useState(false);
-  const navigate = useNavigate();
+
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
+  const [newPosterFile, setNewPosterFile] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [movieIdToDelete, setMovieIdToDelete] = useState('');
+  const [showMovies, setShowMovies] = useState(false);
 
-  const { isAuthenticated, token, userRole, login, logout } = useAuthStore();
-
-  // Sanity client setup
-  const sanity = sanityClient({
-    projectId: 'your-project-id',  // Replace with your project ID
-    dataset: 'production',         // Replace with your dataset
-    apiVersion: '2023-03-25',      // Use the correct API version
-    token: 'your-sanity-api-token', // Replace with your sanity API token
-    useCdn: false,
-  });
+  const navigate = useNavigate();
+  const { token, userRole } = useAuthStore();
 
   useEffect(() => {
     const fetchMovies = async () => {
-      if (!token) {
-        setError('No authentication token found. Please log in.');
-        return;
-      }
+      if (!token) return setError('No authentication token found. Please log in.');
 
       try {
         const response = await axios.get('https://critix-backend.onrender.com/api/movies', {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` }
         });
         setMovies(response.data);
-      } catch (err) {
+      } catch {
         setError('Error fetching movies. Please try again.');
       }
     };
@@ -66,112 +54,52 @@ const Dashboard = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
+    setFormData((prevData) => ({ ...prevData, [name]: value }));
   };
 
-  // Handle image upload to Sanity
   const handleImageUpload = async (e) => {
     const file = e.target.files[0];
 
-    if (!file) {
-      setError('No file selected.');
-      return;
+    if (!file) return setError('No file selected.');
+
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+    if (!allowedTypes.includes(file.type)) return setError('Invalid file type.');
+
+    try {
+      const uploadedAsset = await client.assets.upload('image', file, {
+        filename: file.name,
+      });
+      setFormData((prevState) => ({
+        ...prevState,
+        poster: {
+          _type: "image",
+          asset: {
+            _ref: uploadedAsset._id,
+            _type: "reference",
+          }
+        },
+      }));
+      setSuccessMessage('Image uploaded successfully!');
+    } catch {
+      setError('Error uploading image. Please try again.');
     }
-
-    const reader = new FileReader();
-
-    reader.onloadend = async () => {
-      const image = reader.result;
-
-      try {
-        const uploadedAsset = await sanity.assets.upload('image', file, {
-          filename: file.name,
-        });
-        setFormData((prevState) => ({
-          ...prevState,
-          poster: uploadedAsset.url, // Save the URL returned by Sanity
-        }));
-        setSuccessMessage('Image uploaded successfully!');
-      } catch (err) {
-        setError('Error uploading image. Please try again.');
-      }
-    };
-
-    reader.readAsDataURL(file);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!token || userRole !== 'admin') return setError('Admin access required.');
 
-    if (!token) {
-      setError('No authentication token found. Please log in.');
-      return;
-    }
-
-    if (userRole !== 'admin') {
-      setError('Only admins can create movies.');
-      return;
-    }
+    if (!formData.poster) return setError('Please upload a poster image before submitting.');
 
     try {
-      const response = await axios.post(
-          'https://critix-backend.onrender.com/api/movies',
-          formData,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-      );
-
-      setFormData({
-        title: '',
-        description: '',
-        genre: '',
-        rating: '',
-        releaseYear: '',
-        poster: '',
+      await axios.post('https://critix-backend.onrender.com/api/movies', formData, {
+        headers: { Authorization: `Bearer ${token}` },
       });
-
+      setFormData({ title: '', description: '', genre: '', rating: '', releaseYear: '', poster: '' });
       setSuccessMessage('Movie created successfully!');
       setError('');
-      setIsModalOpen(false);
-    } catch (err) {
+    } catch {
       setError('Error creating movie. Please try again.');
-      setSuccessMessage('');
-    }
-  };
-
-  const handleDelete = async () => {
-    if (!token || !selectedMovie?._id) {
-      setError('No authentication token or movie ID found. Please log in or select a movie to delete.');
-      return;
-    }
-
-    if (userRole !== 'admin') {
-      setError('Only admins can delete movies.');
-      return;
-    }
-
-    try {
-      const response = await axios.delete(
-          `https://critix-backend.onrender.com/api/movies/${selectedMovie._id}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-      );
-      setSuccessMessage('Movie deleted successfully!');
-      setError('');
-      setIsDeleteModalOpen(false);
-      setSelectedMovie(null);
-    } catch (err) {
-      setError('Error deleting movie. Please try again.');
-      setSuccessMessage('');
     }
   };
 
@@ -183,63 +111,76 @@ const Dashboard = () => {
       rating: movie.rating || '',
       genre: movie.genre || '',
       releaseYear: movie.releaseYear || '',
-      poster: movie.poster || '',
+      poster: movie.poster || ''
     });
   };
 
-  const handleUpdateMovie = async () => {
-    if (!selectedMovie || !selectedMovie._id) {
-      console.error('No movie selected or invalid movie ID.');
-      return;
-    }
+  const handleDelete = async () => {
+    if (!token || !selectedMovie?._id) return setError('Please log in or select a movie to delete.');
 
-    if (!token) {
-      console.error('No JWT token found.');
-      return;
-    }
-
-    if (userRole !== 'admin') {
-      setError('Only admins can update movies.');
-      return;
-    }
+    if (userRole !== 'admin') return setError('Only admins can delete movies.');
 
     try {
+      await axios.delete(`https://critix-backend.onrender.com/api/movies/${selectedMovie._id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setSuccessMessage('Movie deleted successfully!');
+      setSelectedMovie(null);
+    } catch {
+      setError('Error deleting movie. Please try again.');
+    }
+  };
+
+  const handleUpdateMovie = async (e) => {
+    e.preventDefault(); // Prevent form submission default behavior
+
+    if (!selectedMovie || !selectedMovie._id) return setError('Invalid movie selected.');
+
+    try {
+      let updatedPoster = updatedInfo.poster;
+
+      if (newPosterFile) {
+        const uploadedAsset = await client.assets.upload('image', newPosterFile, {
+          filename: newPosterFile.name,
+        });
+        updatedPoster = {
+          _type: "image",
+          asset: {
+            _ref: uploadedAsset._id,
+            _type: "reference",
+          },
+        };
+      }
+
       const response = await axios.patch(
           `https://critix-backend.onrender.com/api/movies/${selectedMovie._id}`,
           {
-            title: updatedInfo.title,
-            description: updatedInfo.description,
-            rating: updatedInfo.rating,
-            genre: updatedInfo.genre,
-            releaseYear: updatedInfo.releaseYear,
-            poster: updatedInfo.poster,
+            ...updatedInfo,
+            poster: updatedPoster,
           },
           {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
+            headers: { Authorization: `Bearer ${token}` },
           }
       );
+
+      setMovies((prevMovies) =>
+          prevMovies.map((movie) =>
+              movie._id === selectedMovie._id ? response.data : movie
+          )
+      );
+
       setSuccessMessage('Movie updated successfully!');
-      setError('');
-      navigate('/');
+      setSelectedMovie(null);
+      setNewPosterFile(null);
     } catch (err) {
+      console.error('Error updating movie:', err);
       setError('Error updating movie. Please try again.');
-      setSuccessMessage('');
     }
   };
 
-  const toggleModal = () => {
-    setIsModalOpen(!isModalOpen);
-  };
-
-  const toggleDeleteModal = () => {
-    setIsDeleteModalOpen(!isDeleteModalOpen);
-  };
-
-  const toggleShowMovies = () => {
-    setShowMovies((prevState) => !prevState);
-  };
+  const toggleModal = () => setIsModalOpen(!isModalOpen);
+  const toggleDeleteModal = () => setIsDeleteModalOpen(!isDeleteModalOpen);
+  const toggleShowMovies = () => setShowMovies((prevState) => !prevState);
 
   return (
       <div className="max-w-3xl mx-auto p-4">
@@ -255,107 +196,93 @@ const Dashboard = () => {
         {successMessage && <div className="text-green-500 mb-4">{successMessage}</div>}
         {error && <div className="text-red-500 mb-4">{error}</div>}
 
-        <div className={`transition-all duration-500 ease-in-out ${isModalOpen ? 'max-h-screen' : 'max-h-0'} overflow-hidden`}>
-          <div className="bg-white p-6 rounded-lg shadow-lg w-full">
-            <h2 className="text-2xl font-bold mb-4">Create a Movie</h2>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        {isModalOpen && (
+            <div className="bg-white p-6 rounded-lg shadow-lg w-full">
+              <h2 className="text-2xl font-bold mb-4">Create a Movie</h2>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  <div>
+                    <label htmlFor="title" className="block text-sm font-medium text-gray-700">Title</label>
+                    <input
+                        type="text"
+                        id="title"
+                        name="title"
+                        value={formData.title}
+                        onChange={handleInputChange}
+                        className="mt-1 p-2 w-full border border-gray-300 rounded-md"
+                        required
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="rating" className="block text-sm font-medium text-gray-700">Rating 1-5</label>
+                    <input
+                        type="number"
+                        id="rating"
+                        name="rating"
+                        value={formData.rating}
+                        onChange={handleInputChange}
+                        className="mt-1 p-2 w-full border border-gray-300 rounded-md"
+                        required
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  <div>
+                    <label htmlFor="genre" className="block text-sm font-medium text-gray-700">Genre</label>
+                    <input
+                        type="text"
+                        id="genre"
+                        name="genre"
+                        value={formData.genre}
+                        onChange={handleInputChange}
+                        className="mt-1 p-2 w-full border border-gray-300 rounded-md"
+                        required
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="releaseYear" className="block text-sm font-medium text-gray-700">Release Year</label>
+                    <input
+                        type="number"
+                        id="releaseYear"
+                        name="releaseYear"
+                        value={formData.releaseYear}
+                        onChange={handleInputChange}
+                        className="mt-1 p-2 w-full border border-gray-300 rounded-md"
+                        required
+                    />
+                  </div>
+                </div>
                 <div>
-                  <label htmlFor="title" className="block text-sm font-medium text-gray-700">
-                    Title
-                  </label>
-                  <input
-                      type="text"
-                      id="title"
-                      name="title"
-                      value={formData.title}
+                  <label htmlFor="description" className="block text-sm font-medium text-gray-700">Description</label>
+                  <textarea
+                      id="description"
+                      name="description"
+                      value={formData.description}
                       onChange={handleInputChange}
                       className="mt-1 p-2 w-full border border-gray-300 rounded-md"
                       required
                   />
                 </div>
                 <div>
-                  <label htmlFor="rating" className="block text-sm font-medium text-gray-700">
-                    Rating 1-5
-                  </label>
+                  <label htmlFor="poster" className="block text-sm font-medium text-gray-700">Upload Poster Image</label>
                   <input
-                      type="number"
-                      id="rating"
-                      name="rating"
-                      value={formData.rating}
-                      onChange={handleInputChange}
+                      type="file"
+                      id="poster"
+                      name="poster"
+                      onChange={handleImageUpload}
                       className="mt-1 p-2 w-full border border-gray-300 rounded-md"
                       required
                   />
                 </div>
-              </div>
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <div>
-                  <label htmlFor="genre" className="block text-sm font-medium text-gray-700">
-                    Genre
-                  </label>
-                  <input
-                      type="text"
-                      id="genre"
-                      name="genre"
-                      value={formData.genre}
-                      onChange={handleInputChange}
-                      className="mt-1 p-2 w-full border border-gray-300 rounded-md"
-                      required
-                  />
-                </div>
-                <div>
-                  <label htmlFor="releaseYear" className="block text-sm font-medium text-gray-700">
-                    Release Year
-                  </label>
-                  <input
-                      type="number"
-                      id="releaseYear"
-                      name="releaseYear"
-                      value={formData.releaseYear}
-                      onChange={handleInputChange}
-                      className="mt-1 p-2 w-full border border-gray-300 rounded-md"
-                      required
-                  />
-                </div>
-              </div>
-              <div>
-                <label htmlFor="description" className="block text-sm font-medium text-gray-700">
-                  Description
-                </label>
-                <textarea
-                    id="description"
-                    name="description"
-                    value={formData.description}
-                    onChange={handleInputChange}
-                    className="mt-1 p-2 w-full border border-gray-300 rounded-md"
-                    required
-                />
-              </div>
-
-              <div>
-                <label htmlFor="poster" className="block text-sm font-medium text-gray-700">
-                  Upload Poster Image
-                </label>
-                <input
-                    type="file"
-                    id="poster"
-                    name="poster"
-                    onChange={handleImageUpload}
-                    className="mt-1 p-2 w-full border border-gray-300 rounded-md"
-                    required
-                />
-              </div>
-
-              <button type="submit" className="w-full bg-blue-500 text-white p-2 rounded-md hover:bg-gray-600">
-                Create Movie
+                <button type="submit" className="w-full bg-blue-500 text-white p-2 rounded-md hover:bg-gray-600">
+                  Create Movie
+                </button>
+              </form>
+              <button onClick={toggleModal} className="absolute top-2 right-2 text-gray-500 hover:text-gray-700">
+                &times;
               </button>
-            </form>
-            <button onClick={toggleModal} className="absolute top-2 right-2 text-gray-500 hover:text-gray-700">
-              &times;
-            </button>
-          </div>
-        </div>
+            </div>
+        )}
 
         <div className="container mx-auto p-4">
           {showMovies && (
@@ -379,107 +306,81 @@ const Dashboard = () => {
                 <form onSubmit={handleUpdateMovie} className="space-y-4">
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                     <div>
-                      <label htmlFor="title" className="block text-sm font-medium text-gray-700">
-                        Title
-                      </label>
+                      <label htmlFor="title" className="block text-sm font-medium text-gray-700">Title</label>
                       <input
                           type="text"
                           id="title"
                           name="title"
-                          value={updatedInfo.title}
+                          value={updatedInfo.title || ''}
                           onChange={(e) => setUpdatedInfo({ ...updatedInfo, title: e.target.value })}
                           className="mt-1 p-2 w-full border border-gray-300 rounded-md"
                           required
                       />
                     </div>
                     <div>
-                      <label htmlFor="rating" className="block text-sm font-medium text-gray-700">
-                        Rating 1-5
-                      </label>
+                      <label htmlFor="rating" className="block text-sm font-medium text-gray-700">Rating 1-5</label>
                       <input
                           type="number"
                           id="rating"
                           name="rating"
-                          value={updatedInfo.rating}
+                          value={updatedInfo.rating || ''}
                           onChange={(e) => setUpdatedInfo({ ...updatedInfo, rating: e.target.value })}
                           className="mt-1 p-2 w-full border border-gray-300 rounded-md"
                           required
                       />
                     </div>
                   </div>
-
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                     <div>
-                      <label htmlFor="genre" className="block text-sm font-medium text-gray-700">
-                        Genre
-                      </label>
+                      <label htmlFor="genre" className="block text-sm font-medium text-gray-700">Genre</label>
                       <input
                           type="text"
                           id="genre"
                           name="genre"
-                          value={updatedInfo.genre}
+                          value={updatedInfo.genre || ''}
                           onChange={(e) => setUpdatedInfo({ ...updatedInfo, genre: e.target.value })}
                           className="mt-1 p-2 w-full border border-gray-300 rounded-md"
                           required
                       />
                     </div>
-
                     <div>
-                      <label htmlFor="releaseYear" className="block text-sm font-medium text-gray-700">
-                        Release Year
-                      </label>
+                      <label htmlFor="releaseYear" className="block text-sm font-medium text-gray-700">Release Year</label>
                       <input
                           type="number"
                           id="releaseYear"
                           name="releaseYear"
-                          value={updatedInfo.releaseYear}
+                          value={updatedInfo.releaseYear || ''}
                           onChange={(e) => setUpdatedInfo({ ...updatedInfo, releaseYear: e.target.value })}
                           className="mt-1 p-2 w-full border border-gray-300 rounded-md"
                           required
                       />
                     </div>
                   </div>
-
                   <div>
-                    <label htmlFor="description" className="block text-sm font-medium text-gray-700">
-                      Description
-                    </label>
+                    <label htmlFor="description" className="block text-sm font-medium text-gray-700">Description</label>
                     <textarea
                         id="description"
                         name="description"
-                        value={updatedInfo.description}
+                        value={updatedInfo.description || ''}
                         onChange={(e) => setUpdatedInfo({ ...updatedInfo, description: e.target.value })}
                         className="mt-1 p-2 w-full border border-gray-300 rounded-md"
                         required
                     />
                   </div>
-
                   <div>
-                    <label htmlFor="poster" className="block text-sm font-medium text-gray-700">
-                      Poster URL
-                    </label>
+                    <label htmlFor="newPoster" className="block text-sm font-medium text-gray-700">Upload New Poster</label>
                     <input
-                        type="url"
-                        id="poster"
-                        name="poster"
-                        value={updatedInfo.poster}
-                        onChange={(e) => setUpdatedInfo({ ...updatedInfo, poster: e.target.value })}
+                        type="file"
+                        id="newPoster"
+                        name="newPoster"
+                        onChange={(e) => setNewPosterFile(e.target.files[0])}
                         className="mt-1 p-2 w-full border border-gray-300 rounded-md"
-                        required
                     />
                   </div>
-
                   <button type="submit" className="w-full bg-blue-500 text-white p-2 rounded-md hover:bg-gray-600">
                     Update Movie
                   </button>
                 </form>
-
-                <button
-                    onClick={toggleDeleteModal}
-                    className="mt-4 bg-red-500 text-white p-2 rounded-md hover:bg-red-600"
-                >
-                  Delete Movie
-                </button>
               </div>
           )}
         </div>
