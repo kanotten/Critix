@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode"; // Correct import
 import useAuthStore from "../store/auth"; // Import Zustand store
+import { Link } from "react-router-dom";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -93,9 +94,9 @@ const Login = () => {
 
         <p className="text-sm text-center mt-4">
           Don't have an account?{" "}
-          <a href="/register" className="text-blue-600 hover:underline">
+          <Link to="/register" className="text-blue-600 hover:underline">
             Register here
-          </a>
+          </Link>
         </p>
       </div>
     </div>
