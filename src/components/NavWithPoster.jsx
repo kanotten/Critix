@@ -1,10 +1,9 @@
+import axios from "axios";
+import { AnimatePresence, motion } from "framer-motion"; // eslint-disable-line no-unused-vars
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { AnimatePresence, motion } from "framer-motion"; // eslint-disable-line no-unused-vars
-import CritiXLogo from "./CritiXLogo";
-import SearchBar from "./SearchBar";
-import axios from "axios";
 import useAuthStore from "../store/auth"; // For authentication state
+import CritiXLogo from "./CritiXLogo";
 
 const NavWithPosters = () => {
   const [moviesWithPosters, setMoviesWithPosters] = React.useState([]);
@@ -22,7 +21,7 @@ const NavWithPosters = () => {
       .get("https://critix-backend.onrender.com/api/movies")
       .then((res) => {
         const validPosters = res.data.filter(
-          (movie) => movie.poster && movie.poster.trim() !== "",
+          (movie) => movie.poster && movie.poster.trim() !== ""
         );
         setMoviesWithPosters(validPosters);
       })
@@ -95,7 +94,7 @@ const NavWithPosters = () => {
 
       {/* Navigation Links */}
       <div className="relative z-10 flex flex-col items-center space-y-2 mt-60">
-        <SearchBar />
+        {/* <SearchBar />*/}
         <ul className="hidden md:flex flex-wrap justify-center space-x-4 mt-24 bg-black bg-opacity-60 p-2">
           {/* Home Link */}
           <li>
