@@ -1,9 +1,9 @@
+import { Link } from "react-router-dom";
 import CritiXLogo from "./CritiXLogo";
 
 const Footer = ({ darkMode }) => {
   const year = new Date().getFullYear();
 
-  const navLinks = ["Home"];
   const platforms = [
     ["IMDb", "https://www.imdb.com"],
     ["Netflix", "https://www.netflix.com"],
@@ -12,6 +12,7 @@ const Footer = ({ darkMode }) => {
     ["Viaplay", "https://www.viaplay.com"],
     ["SkyShowtime", "https://www.skyshowtime.com"],
   ];
+
   const socials = [
     ["Facebook", "https://www.facebook.com"],
     ["Instagram", "https://www.instagram.com"],
@@ -40,16 +41,14 @@ const Footer = ({ darkMode }) => {
         <div>
           <h3 className="text-base font-semibold mb-2">Navigation</h3>
           <ul className="space-y-1">
-            {navLinks.map((text, idx) => (
-              <li key={idx}>
-                <a
-                  href={`/${text.toLowerCase().replace(/\s/g, "")}`}
-                  className="inline-block border-b-2 border-transparent hover:border-current transition duration-300"
-                >
-                  {text}
-                </a>
-              </li>
-            ))}
+            <li>
+              <Link
+                to="/"
+                className="inline-block border-b-2 border-transparent hover:border-current transition duration-300"
+              >
+                Home
+              </Link>
+            </li>
           </ul>
         </div>
 
@@ -91,4 +90,4 @@ const Footer = ({ darkMode }) => {
   );
 };
 
-export default Footer;  
+export default Footer;

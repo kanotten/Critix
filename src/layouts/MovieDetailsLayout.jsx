@@ -1,5 +1,5 @@
 import Navbar from "../components/NavWithPoster";
-
+import Footer from "../components/Footer";
 
 const MovieDetailsLayout = ({ children }) => {
   return (
@@ -7,8 +7,8 @@ const MovieDetailsLayout = ({ children }) => {
       <Navbar />
       <main className="flex-1 flex flex-col md:flex-row gap-8 p-4">
         {children}
-        
       </main>
+      <Footer />
     </div>
   );
 };
